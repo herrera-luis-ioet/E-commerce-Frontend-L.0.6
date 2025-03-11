@@ -14,6 +14,7 @@ interface FilterState {
   searchQuery: string;
   currentPage: number;
   itemsPerPage: number;
+  selectedCategory: string | null;
 }
 
 /**
@@ -25,7 +26,8 @@ const initialState: FilterState = {
   viewMode: 'grid',
   searchQuery: '',
   currentPage: 1,
-  itemsPerPage: 12
+  itemsPerPage: 12,
+  selectedCategory: null
 };
 
 /**
@@ -105,6 +107,15 @@ const filterSlice = createSlice({
     },
     
     /**
+     * Set selected category
+     */
+    setSelectedCategory: (state, action: PayloadAction<string | null>) => {
+      state.selectedCategory = action.payload;
+      // Reset to first page when category changes
+      state.currentPage = 1;
+    },
+    
+    /**
      * Reset filter state
      */
     resetFilterState: () => initialState
@@ -121,6 +132,7 @@ export const {
   setSearchQuery,
   setCurrentPage,
   setItemsPerPage,
+  setSelectedCategory,
   resetFilterState
 } = filterSlice.actions;
 
