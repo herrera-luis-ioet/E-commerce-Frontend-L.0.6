@@ -1,10 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit';
+import productReducer from './slices/productSlice';
+import filterReducer from './slices/filterSlice';
 
-// This will be expanded with reducers for the product catalog
+// Configure the Redux store with product and filter reducers
 const store = configureStore({
   reducer: {
-    // Add reducers here as they are created
-    // Example: products: productsReducer,
+    products: productReducer,
+    filter: filterReducer,
   },
   // Add middleware as needed
   middleware: (getDefaultMiddleware) => getDefaultMiddleware(),
