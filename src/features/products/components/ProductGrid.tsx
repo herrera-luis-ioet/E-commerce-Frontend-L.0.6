@@ -95,28 +95,12 @@ const ProductGrid: React.FC<ProductGridProps> = ({
     );
   }
 
-  // Generate grid template columns based on props
-  const gridTemplateColumns = {
-    sm: `repeat(${smColumns}, minmax(0, 1fr))`,
-    md: `repeat(${mdColumns}, minmax(0, 1fr))`,
-    lg: `repeat(${lgColumns}, minmax(0, 1fr))`,
-  };
-
   // Generate gap class based on prop
   const gapClass = `gap-${gap}`;
 
   return (
     <div 
       className={`grid ${gapClass} grid-cols-${smColumns} md:grid-cols-${mdColumns} lg:grid-cols-${lgColumns} ${className}`}
-      style={{
-        gridTemplateColumns: gridTemplateColumns.sm,
-        '@media (min-width: 768px)': {
-          gridTemplateColumns: gridTemplateColumns.md,
-        },
-        '@media (min-width: 1024px)': {
-          gridTemplateColumns: gridTemplateColumns.lg,
-        },
-      }}
     >
       {products.map((product) => (
         <ProductCard

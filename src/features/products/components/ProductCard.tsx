@@ -80,7 +80,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   };
 
   // Render star rating
-  const renderRating = (rating: number) => {
+  const renderRating = (rating: number, ratingCount: number) => {
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 >= 0.5;
     const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
@@ -115,7 +115,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
         ))}
         
         {/* Rating count */}
-        <span className="ml-1 text-xs text-gray-500">({product.ratingCount})</span>
+        <span className="ml-1 text-xs text-gray-500">({ratingCount})</span>
       </div>
     );
   };
@@ -184,7 +184,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
       <div className="flex-grow">
         <div className="flex items-center justify-between mb-1">
           <span className="text-xs text-gray-500">{product.brand}</span>
-          {renderRating(product.rating)}
+          {renderRating(product.rating, product.ratingCount)}
         </div>
         
         <h3 className="font-medium text-gray-900 dark:text-white mb-1 line-clamp-2">{product.name}</h3>

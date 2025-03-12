@@ -15,7 +15,7 @@ export interface RelatedProductsProps {
   /** Loading state */
   isLoading?: boolean;
   /** Error message */
-  error?: string;
+  error?: string | null;
   /** Handler for view details action */
   onViewDetails?: (product: Product) => void;
   /** Handler for add to cart action */
