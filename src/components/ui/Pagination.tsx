@@ -40,8 +40,6 @@ const Pagination: React.FC<PaginationProps> = ({
 
   // Generate page numbers to display
   const getPageNumbers = () => {
-    const pageNumbers: (number | string)[] = [];
-    
     // Calculate range of pages to show
     const totalPageNumbers = siblingCount * 2 + 3; // siblings + current + first + last
     

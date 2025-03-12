@@ -96,7 +96,7 @@ const ProductGallery: React.FC<ProductGalleryProps> = ({
             >
               <img 
                 src={image} 
-                alt={`${product.name} - Image ${index + 1}`}
+                alt={`Product thumbnail ${index + 1}`}
                 className="w-full h-full object-cover"
                 onError={handleImageError}
               />

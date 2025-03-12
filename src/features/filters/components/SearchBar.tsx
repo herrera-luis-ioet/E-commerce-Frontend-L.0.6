@@ -39,12 +39,13 @@ const SearchBar: React.FC<SearchBarProps> = ({
   }, [storeSearchQuery]);
   
   // Debounced search handler
-  const debouncedSearch = useCallback(
-    debounce((value: string) => {
-      dispatch(setSearchQuery(value));
-    }, debounceDelay),
-    [dispatch, debounceDelay]
-  );
+  const debouncedSearch = useCallback((value: string) => {
+    const handler = debounce((searchValue: string) => {
+      dispatch(setSearchQuery(searchValue));
+    }, debounceDelay);
+    
+    handler(value);
+  }, [dispatch, debounceDelay]);
   
   // Handle input change
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

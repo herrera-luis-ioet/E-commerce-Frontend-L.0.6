@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import ProductDetail from '../features/products/components/ProductDetail';
 import { Product } from '../types/product.types';
-import Spinner from '../components/ui/Spinner';
 
 /**
  * PUBLIC_INTERFACE

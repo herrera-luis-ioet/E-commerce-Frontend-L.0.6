@@ -2,11 +2,7 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useAppDispatch } from '../../store/hooks';
 import {
   useProductCatalog,
-  useProductFiltering,
-  useViewMode,
-  useCurrentPage,
-  useTotalPages,
-  useItemsPerPage
+  useProductFiltering
 } from '../../store/hooks';
 import { fetchProducts } from '../../store/slices/productSlice';
 import { setViewMode, setCurrentPage } from '../../store/slices/filterSlice';
@@ -52,7 +48,7 @@ const ProductCatalogManager: React.FC = () => {
   } = useProductCatalog();
   
   // Get filtering data from Redux store
-  const { filters, searchQuery, categories, selectedCategory } = useProductFiltering();
+  const { filters, searchQuery, selectedCategory } = useProductFiltering();
   
   // Local state for mobile filter visibility
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);

@@ -148,19 +148,19 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
       <nav className="text-sm text-gray-600 dark:text-gray-400">
         <ol className="flex items-center space-x-2">
           <li>
-            <a href="#" className="hover:text-primary">Home</a>
+            <a href="/" className="hover:text-primary">Home</a>
           </li>
           <li>
             <span className="mx-2">/</span>
           </li>
           <li>
-            <a href="#" className="hover:text-primary">Products</a>
+            <a href="/products" className="hover:text-primary">Products</a>
           </li>
           <li>
             <span className="mx-2">/</span>
           </li>
           <li>
-            <a href="#" className="hover:text-primary">{product.category}</a>
+            <a href={`/categories/${product.categoryId}`} className="hover:text-primary">{product.category}</a>
           </li>
           <li>
             <span className="mx-2">/</span>
