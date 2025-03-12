@@ -37,7 +37,7 @@ const NotFoundPage = lazy(() => import('../pages/NotFoundPage'));
 // Loading fallback component
 const LoadingFallback = () => (
   <div className="flex justify-center items-center h-64">
-    <Spinner size="large" />
+    <Spinner size="lg" />
   </div>
 );
 
