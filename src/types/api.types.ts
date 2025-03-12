@@ -23,13 +23,13 @@ export interface ApiResponse<T = any> {
  */
 export interface PaginatedResponse<T = any> extends ApiResponse<T[]> {
   /** Pagination metadata */
-  pagination: {
+  meta: {
     /** Current page number */
     currentPage: number;
     /** Number of items per page */
     itemsPerPage: number;
     /** Total number of items across all pages */
-    totalItems: number;
+    total: number;
     /** Total number of pages */
     totalPages: number;
     /** Whether there is a next page */
@@ -44,7 +44,7 @@ export interface PaginatedResponse<T = any> extends ApiResponse<T[]> {
  */
 export interface RequestParams {
   /** Query parameters as key-value pairs */
-  params?: Record<string, string | number | boolean | undefined>;
+  params?: Record<string, string | number | boolean | undefined | string[]>;
   /** Request headers */
   headers?: Record<string, string>;
   /** Request timeout in milliseconds */
@@ -133,7 +133,7 @@ export interface ApiRequestConfig {
   /** Request data */
   data?: any;
   /** Request parameters */
-  params?: Record<string, string | number | boolean | undefined>;
+  params?: Record<string, string | number | boolean | undefined | string[]>;
   /** Request headers */
   headers?: Record<string, string>;
   /** Request timeout in milliseconds */

@@ -1,4 +1,4 @@
-import { configureStore } from '@reduxjs/toolkit';
+import { configureStore, AnyAction } from '@reduxjs/toolkit';
 import productReducer, {
   fetchProducts,
   fetchProductById,
@@ -88,15 +88,28 @@ const mockCategories: Category[] = [
 
 // Mock API response format
 const createMockApiResponse = (data: any, total = 0, totalPages = 0) => ({
+  success: true,
+  statusCode: 200,
   data,
   meta: {
     total,
-    totalPages
+    totalPages,
+    currentPage: 1,
+    itemsPerPage: 10,
+    hasNextPage: false,
+    hasPrevPage: false
   }
 });
 
 describe('Product Slice', () => {
-  let store: ReturnType<typeof configureStore>;
+  // Define the store type with the correct state shape
+  interface RootState {
+    products: ReturnType<typeof productReducer>;
+  }
+  
+  let store: ReturnType<typeof configureStore<{
+    products: ReturnType<typeof productReducer>;
+  }>>;
 
   beforeEach(() => {
     // Reset mocks
@@ -222,7 +235,10 @@ describe('Product Slice', () => {
     test('fetchProductById should fetch a product successfully', async () => {
       // Mock the API response
       mockedProductService.getProductById.mockResolvedValueOnce({
-        data: mockProducts[0]
+        success: true,
+        statusCode: 200,
+        data: mockProducts[0],
+        message: 'Product retrieved successfully'
       });
       
       // Dispatch the action
@@ -256,7 +272,10 @@ describe('Product Slice', () => {
     test('fetchCategories should fetch categories successfully', async () => {
       // Mock the API response
       mockedProductService.getCategories.mockResolvedValueOnce({
-        data: mockCategories
+        success: true,
+        statusCode: 200,
+        data: mockCategories,
+        message: 'Categories retrieved successfully'
       });
       
       // Dispatch the action
@@ -349,13 +368,13 @@ describe('Product Slice', () => {
   // Test loading states
   describe('Loading States', () => {
     test('should set loading to true when fetching products', () => {
-      store.dispatch(fetchProducts.pending('', {}));
+      store.dispatch(fetchProducts.pending('', {}) as AnyAction);
       expect(store.getState().products.loading).toBe(true);
       expect(store.getState().products.error).toBeNull();
     });
 
     test('should set loading to true when fetching a product by ID', () => {
-      store.dispatch(fetchProductById.pending('', '1'));
+      store.dispatch(fetchProductById.pending('', '1') as AnyAction);
       expect(store.getState().products.loading).toBe(true);
       expect(store.getState().products.error).toBeNull();
     });

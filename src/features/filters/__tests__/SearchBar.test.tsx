@@ -107,7 +107,9 @@ describe('SearchBar Component', () => {
     
     // Click the clear button (inside the end adornment)
     const clearButton = endAdornment.querySelector('button');
-    fireEvent.click(clearButton);
+    if (clearButton) {
+      fireEvent.click(clearButton);
+    }
     
     // Dispatch should be called with empty string
     expect(mockDispatch).toHaveBeenCalledWith(setSearchQuery(''));
