@@ -120,7 +120,7 @@ const RelatedProducts: React.FC<RelatedProductsProps> = ({
       <div 
         ref={scrollContainerRef}
         className="flex overflow-x-auto pb-4 scrollbar-hide -mx-6 px-6 space-x-4"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        style={{ scrollbarWidth: 'none' as 'none', msOverflowStyle: 'none' as any }}
       >
         {filteredProducts.map(product => (
           <div key={product.id} className="flex-shrink-0 w-64">

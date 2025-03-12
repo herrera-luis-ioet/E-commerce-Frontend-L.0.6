@@ -70,7 +70,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   }
 
   // Calculate discount price if product is on sale
-  const discountedPrice = product.onSale && product.discountPercentage
+  const discountedPrice = product.onSale && product.discountPercentage !== undefined
     ? product.price * (1 - product.discountPercentage / 100)
     : null;
 

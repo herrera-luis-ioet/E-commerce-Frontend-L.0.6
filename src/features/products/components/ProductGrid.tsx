@@ -98,9 +98,12 @@ const ProductGrid: React.FC<ProductGridProps> = ({
   // Generate gap class based on prop
   const gapClass = `gap-${gap}`;
 
+  // Create CSS classes for grid columns
+  const gridColsClasses = `grid-cols-${smColumns} md:grid-cols-${mdColumns} lg:grid-cols-${lgColumns}`;
+
   return (
     <div 
-      className={`grid ${gapClass} grid-cols-${smColumns} md:grid-cols-${mdColumns} lg:grid-cols-${lgColumns} ${className}`}
+      className={`grid ${gapClass} ${gridColsClasses} ${className}`}
     >
       {products.map((product) => (
         <ProductCard

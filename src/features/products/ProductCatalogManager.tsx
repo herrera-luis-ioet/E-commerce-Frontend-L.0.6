@@ -60,7 +60,7 @@ const ProductCatalogManager: React.FC = () => {
   // Fetch products when component mounts or when filters/pagination/sorting changes
   useEffect(() => {
     dispatch(fetchProducts({
-      filters,
+      filter: filters,
       page: currentPage,
       limit: itemsPerPage,
       sort: sortOption
@@ -87,7 +87,7 @@ const ProductCatalogManager: React.FC = () => {
     if (loading) {
       return (
         <div className="flex justify-center items-center h-64">
-          <Spinner size="large" />
+          <Spinner size="lg" />
         </div>
       );
     }
@@ -96,7 +96,7 @@ const ProductCatalogManager: React.FC = () => {
       return (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
           <strong className="font-bold">Error!</strong>
-          <span className="block sm:inline"> {error}</span>
+          <span className="block sm:inline"> {error || 'An error occurred'}</span>
         </div>
       );
     }
@@ -113,9 +113,9 @@ const ProductCatalogManager: React.FC = () => {
     }
 
     return viewMode === 'grid' ? (
-      <ProductGrid products={products} isLoading={loading} error={error} />
+      <ProductGrid products={products} isLoading={loading} error={error || undefined} />
     ) : (
-      <ProductList products={products} isLoading={loading} error={error} showActions={true} />
+      <ProductList products={products} isLoading={loading} error={error || undefined} showActions={true} />
     );
   }, [products, loading, error, viewMode]);
 

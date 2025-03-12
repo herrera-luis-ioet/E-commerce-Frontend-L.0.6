@@ -125,7 +125,7 @@ const ProductList: React.FC<ProductListProps> = ({
         ))}
         
         {/* Rating count */}
-        <span className="ml-1 text-xs text-gray-500">({product.ratingCount})</span>
+        <span className="ml-1 text-xs text-gray-500">({rating})</span>
       </div>
     );
   };
@@ -134,7 +134,7 @@ const ProductList: React.FC<ProductListProps> = ({
     <div className={`space-y-4 ${className}`}>
       {products.map((product) => {
         // Calculate discount price if product is on sale
-        const discountedPrice = product.onSale && product.discountPercentage
+        const discountedPrice = product.onSale && product.discountPercentage !== undefined
           ? product.price * (1 - product.discountPercentage / 100)
           : null;
 
