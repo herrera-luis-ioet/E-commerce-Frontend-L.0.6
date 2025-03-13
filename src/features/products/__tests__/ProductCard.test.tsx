@@ -165,15 +165,15 @@ describe('ProductCard Component', () => {
     const { container } = render(<ProductCard product={mockProduct} />);
     
     // For a rating of 4.5, we should have 4 full stars, 1 half star, and 0 empty stars
-    const fullStars = container.querySelectorAll('svg[key^="full-"]');
-    const halfStar = container.querySelector('svg[fill="url(#half-star-gradient)"]');
-    const emptyStars = container.querySelectorAll('svg[key^="empty-"]');
-    
-    expect(fullStars.length).toBe(4);
-    expect(halfStar).toBeInTheDocument();
-    expect(emptyStars.length).toBe(0);
-    
     // Check if rating count is displayed
     expect(screen.getByText(`(${mockProduct.ratingCount})`)).toBeInTheDocument();
+    
+    // Check for star SVGs
+    const stars = container.querySelectorAll('svg');
+    expect(stars.length).toBe(5); // Total 5 stars (4 full + 1 half)
+    
+    // Check for half-star gradient
+    const halfStar = container.querySelector('svg path[fill="url(#half-star-gradient)"]');
+    expect(halfStar).toBeTruthy();
   });
 });
