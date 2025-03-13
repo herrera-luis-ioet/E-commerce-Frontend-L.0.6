@@ -3,6 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ProductCard from '../components/ProductCard';
 import { Product } from '../../../types/product.types';
+import { formatPrice } from '../../../utils/formatters';
 
 // Mock the Card, Button, and Spinner components
 jest.mock('../../../components/ui/Card', () => {
@@ -87,8 +88,8 @@ describe('ProductCard Component', () => {
     
     // Check if price is displayed correctly (with discount)
     const discountedPrice = mockProduct.price * (1 - mockProduct.discountPercentage! / 100);
-    expect(screen.getByText(`$${discountedPrice.toFixed(2)}`)).toBeInTheDocument();
-    expect(screen.getByText(`$${mockProduct.price.toFixed(2)}`)).toBeInTheDocument();
+    expect(screen.getByText(formatPrice(discountedPrice))).toBeInTheDocument();
+    expect(screen.getByText(formatPrice(mockProduct.price))).toBeInTheDocument();
     
     // Check if stock badge is displayed
     expect(screen.getByText('In Stock')).toBeInTheDocument();
@@ -108,7 +109,7 @@ describe('ProductCard Component', () => {
   test('renders regular price when product is not on sale', () => {
     const noSaleProduct = { ...mockProduct, onSale: false, discountPercentage: undefined };
     render(<ProductCard product={noSaleProduct} />);
-    expect(screen.getByText(`$${mockProduct.price.toFixed(2)}`)).toBeInTheDocument();
+    expect(screen.getByText(formatPrice(mockProduct.price))).toBeInTheDocument();
     expect(screen.queryByText(`% OFF`)).not.toBeInTheDocument();
   });
 
