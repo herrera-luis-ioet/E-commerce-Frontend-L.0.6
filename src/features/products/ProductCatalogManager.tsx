@@ -78,6 +78,15 @@ const ProductCatalogManager: React.FC = () => {
     setMobileFiltersOpen(prev => !prev);
   }, []);
 
+  // Calculate safe values for totalProducts and totalPages to handle cases where they might be undefined
+  const safeTotalProducts = useMemo(() => {
+    return typeof totalProducts === 'number' ? totalProducts : products.length;
+  }, [totalProducts, products.length]);
+
+  const safeTotalPages = useMemo(() => {
+    return typeof totalPages === 'number' ? totalPages : Math.max(1, Math.ceil(products.length / itemsPerPage));
+  }, [totalPages, products.length, itemsPerPage]);
+
   // Memoize the product display component to prevent unnecessary re-renders
   const ProductDisplay = useMemo(() => {
     if (loading) {
@@ -212,18 +221,18 @@ const ProductCatalogManager: React.FC = () => {
               
               {/* Product count */}
               <div className="mb-4 text-sm text-gray-500">
-                {totalProducts} {totalProducts === 1 ? 'product' : 'products'}
+                {safeTotalProducts} {safeTotalProducts === 1 ? 'product' : 'products'}
               </div>
               
               {/* Product display */}
               {ProductDisplay}
               
               {/* Pagination */}
-              {totalPages > 1 && (
+              {safeTotalPages > 1 && (
                 <div className="mt-8 flex justify-center">
                   <Pagination 
                     currentPage={currentPage} 
-                    totalPages={totalPages} 
+                    totalPages={safeTotalPages} 
                     onPageChange={handlePageChange} 
                   />
                 </div>
