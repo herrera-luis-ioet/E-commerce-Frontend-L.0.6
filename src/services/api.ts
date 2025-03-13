@@ -256,10 +256,13 @@ class ApiService {
   public async getPaginated<T>(url: string, params?: RequestParams): Promise<PaginatedResponse<T>> {
     const response = await this.get<T[]>(url, params);
     
+    // Check if the response already has a meta property (it might be a PaginatedResponse already)
+    const existingMeta = (response as unknown as PaginatedResponse<T>).meta;
+    
     // Create a properly typed PaginatedResponse object by extending the ApiResponse
     const paginatedResponse: PaginatedResponse<T> = {
       ...response,
-      meta: {
+      meta: existingMeta || {
         total: 0,
         totalPages: 0,
         currentPage: 1,
@@ -269,21 +272,23 @@ class ApiService {
       }
     };
     
-    // Check if we need to populate the meta property with default values
-    // based on the array length and provided pagination parameters
-    const dataArray = Array.isArray(response.data) ? response.data : [];
-    const currentPage = params?.params?.page ? Number(params.params.page) : 1;
-    const itemsPerPage = params?.params?.limit ? Number(params.params.limit) : dataArray.length;
-    
-    // Update the meta property with calculated values
-    paginatedResponse.meta = {
-      total: dataArray.length,
-      totalPages: dataArray.length > 0 ? Math.ceil(dataArray.length / itemsPerPage) : 0,
-      currentPage: currentPage,
-      itemsPerPage: itemsPerPage,
-      hasNextPage: currentPage * itemsPerPage < dataArray.length,
-      hasPrevPage: currentPage > 1
-    };
+    // If there's no existing meta or we need to calculate values, do so
+    if (!existingMeta) {
+      // Calculate meta values based on the array length and provided pagination parameters
+      const dataArray = Array.isArray(response.data) ? response.data : [];
+      const currentPage = params?.params?.page ? Number(params.params.page) : 1;
+      const itemsPerPage = params?.params?.limit ? Number(params.params.limit) : dataArray.length;
+      
+      // Update the meta property with calculated values
+      paginatedResponse.meta = {
+        total: dataArray.length,
+        totalPages: dataArray.length > 0 ? Math.ceil(dataArray.length / itemsPerPage) : 0,
+        currentPage: currentPage,
+        itemsPerPage: itemsPerPage,
+        hasNextPage: currentPage * itemsPerPage < dataArray.length,
+        hasPrevPage: currentPage > 1
+      };
+    }
     
     return paginatedResponse;
   }
