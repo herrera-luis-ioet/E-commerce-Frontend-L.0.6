@@ -52,8 +52,8 @@ export const fetchProducts = createAsyncThunk(
       const response = await productService.getProducts(filter, { page, limit, sort });
       return {
         products: response.data,
-        totalProducts: response.meta.total,
-        totalPages: response.meta.totalPages
+        totalProducts: response.meta?.total || response.data.length,
+        totalPages: response.meta?.totalPages || 1
       };
     } catch (error) {
       return rejectWithValue(error instanceof Error ? error.message : 'Failed to fetch products');
@@ -113,8 +113,8 @@ export const fetchProductsByCategory = createAsyncThunk(
       const response = await productService.getProductsByCategory(categoryId, filter, { page, limit, sort });
       return {
         products: response.data,
-        totalProducts: response.meta.total,
-        totalPages: response.meta.totalPages
+        totalProducts: response.meta?.total || response.data.length,
+        totalPages: response.meta?.totalPages || 1
       };
     } catch (error) {
       return rejectWithValue(error instanceof Error ? error.message : 'Failed to fetch products by category');
@@ -140,8 +140,8 @@ export const fetchFeaturedProducts = createAsyncThunk(
       const response = await productService.getFeaturedProducts({ page, limit, sort });
       return {
         products: response.data,
-        totalProducts: response.meta.total,
-        totalPages: response.meta.totalPages
+        totalProducts: response.meta?.total || response.data.length,
+        totalPages: response.meta?.totalPages || 1
       };
     } catch (error) {
       return rejectWithValue(error instanceof Error ? error.message : 'Failed to fetch featured products');
@@ -171,8 +171,8 @@ export const searchProducts = createAsyncThunk(
       const response = await productService.searchProducts(query, filter, { page, limit, sort });
       return {
         products: response.data,
-        totalProducts: response.meta.total,
-        totalPages: response.meta.totalPages
+        totalProducts: response.meta?.total || response.data.length,
+        totalPages: response.meta?.totalPages || 1
       };
     } catch (error) {
       return rejectWithValue(error instanceof Error ? error.message : 'Failed to search products');
