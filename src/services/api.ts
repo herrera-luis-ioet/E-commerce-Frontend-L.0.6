@@ -256,25 +256,36 @@ class ApiService {
   public async getPaginated<T>(url: string, params?: RequestParams): Promise<PaginatedResponse<T>> {
     const response = await this.get<T[]>(url, params);
     
-    // Check if the response already has meta property
-    if (!response.meta) {
-      // Create default meta object based on the array length and provided pagination parameters
-      const dataArray = Array.isArray(response.data) ? response.data : [];
-      const currentPage = params?.params?.page ? Number(params.params.page) : 1;
-      const itemsPerPage = params?.params?.limit ? Number(params.params.limit) : dataArray.length;
-      
-      // Add meta property to the response
-      (response as unknown as PaginatedResponse<T>).meta = {
-        total: dataArray.length,
-        totalPages: dataArray.length > 0 ? 1 : 0,
-        currentPage: currentPage,
-        itemsPerPage: itemsPerPage,
+    // Create a properly typed PaginatedResponse object by extending the ApiResponse
+    const paginatedResponse: PaginatedResponse<T> = {
+      ...response,
+      meta: {
+        total: 0,
+        totalPages: 0,
+        currentPage: 1,
+        itemsPerPage: 10,
         hasNextPage: false,
         hasPrevPage: false
-      };
-    }
+      }
+    };
     
-    return response as unknown as PaginatedResponse<T>;
+    // Check if we need to populate the meta property with default values
+    // based on the array length and provided pagination parameters
+    const dataArray = Array.isArray(response.data) ? response.data : [];
+    const currentPage = params?.params?.page ? Number(params.params.page) : 1;
+    const itemsPerPage = params?.params?.limit ? Number(params.params.limit) : dataArray.length;
+    
+    // Update the meta property with calculated values
+    paginatedResponse.meta = {
+      total: dataArray.length,
+      totalPages: dataArray.length > 0 ? Math.ceil(dataArray.length / itemsPerPage) : 0,
+      currentPage: currentPage,
+      itemsPerPage: itemsPerPage,
+      hasNextPage: currentPage * itemsPerPage < dataArray.length,
+      hasPrevPage: currentPage > 1
+    };
+    
+    return paginatedResponse;
   }
 }
 
