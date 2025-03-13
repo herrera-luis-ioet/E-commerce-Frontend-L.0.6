@@ -28,7 +28,7 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
   const [quantity, setQuantity] = useState<number>(1);
 
   // Calculate discount price if product is on sale
-  const discountedPrice = product.onSale && product.discountPercentage
+  const discountedPrice = product.onSale && product.discountPercentage && typeof product.price === 'number'
     ? product.price * (1 - product.discountPercentage / 100)
     : null;
 
@@ -128,7 +128,7 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
               {formatPrice(discountedPrice)}
             </span>
             <span className="text-xl text-gray-500 line-through">
-              {formatPrice(product.price)}
+              {typeof product.price === 'number' ? formatPrice(product.price) : formatPrice(0)}
             </span>
             <span className="ml-2 bg-red-100 text-red-800 text-sm font-medium px-2 py-0.5 rounded">
               {product.discountPercentage}% OFF
@@ -136,7 +136,7 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
           </>
         ) : (
           <span className="text-3xl font-bold text-gray-900 dark:text-white">
-            {formatPrice(product.price)}
+            {typeof product.price === 'number' ? formatPrice(product.price) : formatPrice(0)}
           </span>
         )}
       </div>
