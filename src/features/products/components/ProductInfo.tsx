@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Product } from '../../../types/product.types';
 import Button from '../../../components/ui/Button';
+import { formatPrice } from '../../../utils/formatters';
 
 /**
  * ProductInfo component props
@@ -31,10 +32,6 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
     ? product.price * (1 - product.discountPercentage / 100)
     : null;
 
-  // Format price with 2 decimal places
-  const formatPrice = (price: number) => {
-    return `$${price.toFixed(2)}`;
-  };
 
   // Handle quantity change
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {

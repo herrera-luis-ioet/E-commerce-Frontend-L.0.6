@@ -3,6 +3,7 @@ import { Product } from '../../../types/product.types';
 import Card from '../../../components/ui/Card';
 import Button from '../../../components/ui/Button';
 import Spinner from '../../../components/ui/Spinner';
+import { formatPrice } from '../../../utils/formatters';
 
 /**
  * ProductList component props
@@ -84,10 +85,6 @@ const ProductList: React.FC<ProductListProps> = ({
     );
   }
 
-  // Format price with 2 decimal places
-  const formatPrice = (price: number) => {
-    return `$${price.toFixed(2)}`;
-  };
 
   // Render star rating
   const renderRating = (rating: number) => {

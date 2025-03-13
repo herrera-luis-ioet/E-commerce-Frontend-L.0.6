@@ -3,6 +3,7 @@ import { Product } from '../../../types/product.types';
 import Card from '../../../components/ui/Card';
 import Spinner from '../../../components/ui/Spinner';
 import Button from '../../../components/ui/Button';
+import { formatPrice } from '../../../utils/formatters';
 
 /**
  * ProductCard component props
@@ -74,10 +75,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
     ? product.price * (1 - product.discountPercentage / 100)
     : null;
 
-  // Format price with 2 decimal places
-  const formatPrice = (price: number) => {
-    return `$${price.toFixed(2)}`;
-  };
 
   // Render star rating
   const renderRating = (rating: number, ratingCount: number) => {
