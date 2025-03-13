@@ -255,6 +255,25 @@ class ApiService {
    */
   public async getPaginated<T>(url: string, params?: RequestParams): Promise<PaginatedResponse<T>> {
     const response = await this.get<T[]>(url, params);
+    
+    // Check if the response already has meta property
+    if (!response.meta) {
+      // Create default meta object based on the array length and provided pagination parameters
+      const dataArray = Array.isArray(response.data) ? response.data : [];
+      const currentPage = params?.params?.page ? Number(params.params.page) : 1;
+      const itemsPerPage = params?.params?.limit ? Number(params.params.limit) : dataArray.length;
+      
+      // Add meta property to the response
+      (response as unknown as PaginatedResponse<T>).meta = {
+        total: dataArray.length,
+        totalPages: dataArray.length > 0 ? 1 : 0,
+        currentPage: currentPage,
+        itemsPerPage: itemsPerPage,
+        hasNextPage: false,
+        hasPrevPage: false
+      };
+    }
+    
     return response as unknown as PaginatedResponse<T>;
   }
 }
