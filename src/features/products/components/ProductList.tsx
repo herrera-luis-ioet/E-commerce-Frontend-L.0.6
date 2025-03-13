@@ -131,9 +131,13 @@ const ProductList: React.FC<ProductListProps> = ({
     <div className={`space-y-4 ${className}`}>
       {products.map((product) => {
         // Calculate discount price if product is on sale
-        const discountedPrice = product.onSale && product.discountPercentage !== undefined
-          ? product.price * (1 - product.discountPercentage / 100)
-          : null;
+        // Ensure price is a valid number before calculation
+        const discountedPrice = product.onSale && 
+          product.discountPercentage !== undefined && 
+          typeof product.price === 'number' && 
+          !isNaN(product.price)
+            ? product.price * (1 - product.discountPercentage / 100)
+            : null;
 
         return (
           <Card 
@@ -182,14 +186,21 @@ const ProductList: React.FC<ProductListProps> = ({
                   {product.description}
                 </p>
                 
+                {/* Price display with proper type checking using formatPrice utility */}
                 <div className="flex items-center space-x-2 mb-4">
                   {discountedPrice ? (
                     <>
-                      <span className="text-lg font-bold text-primary">{formatPrice(discountedPrice)}</span>
-                      <span className="text-sm text-gray-500 line-through">{formatPrice(product.price)}</span>
+                      <span className="text-lg font-bold text-primary">
+                        {formatPrice(discountedPrice, { fallbackValue: 'N/A' })}
+                      </span>
+                      <span className="text-sm text-gray-500 line-through">
+                        {formatPrice(product.price, { fallbackValue: 'N/A' })}
+                      </span>
                     </>
                   ) : (
-                    <span className="text-lg font-bold text-gray-900 dark:text-white">{formatPrice(product.price)}</span>
+                    <span className="text-lg font-bold text-gray-900 dark:text-white">
+                      {formatPrice(product.price, { fallbackValue: 'N/A' })}
+                    </span>
                   )}
                 </div>
                 
