@@ -11,6 +11,10 @@ import {
   ProductView
 } from '../../types/product.types';
 import productService from '../../services/productService';
+import { 
+  transformProductFromBackend, 
+  transformPaginatedProductsFromBackend 
+} from '../../utils/dataTransformers';
 
 /**
  * Initial state for the product slice
@@ -49,11 +53,13 @@ export const fetchProducts = createAsyncThunk(
     sort?: SortOption;
   }, { rejectWithValue }) => {
     try {
-      const response = await productService.getProducts(filter, { page, limit, sort });
+      const backendResponse = await productService.getProducts(filter, { page, limit, sort });
+      const transformedResponse = transformPaginatedProductsFromBackend(backendResponse);
+      
       return {
-        products: response.data,
-        totalProducts: response.meta.total,
-        totalPages: response.meta.totalPages
+        products: transformedResponse.data,
+        totalProducts: transformedResponse.meta.total,
+        totalPages: transformedResponse.meta.totalPages
       };
     } catch (error) {
       return rejectWithValue(error instanceof Error ? error.message : 'Failed to fetch products');
@@ -69,7 +75,7 @@ export const fetchProductById = createAsyncThunk(
   async (id: string, { rejectWithValue }) => {
     try {
       const response = await productService.getProductById(id);
-      return response.data;
+      return transformProductFromBackend(response.data);
     } catch (error) {
       return rejectWithValue(error instanceof Error ? error.message : 'Failed to fetch product');
     }
@@ -84,6 +90,7 @@ export const fetchCategories = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await productService.getCategories();
+      // Categories don't need transformation as they're already in the correct format
       return response.data;
     } catch (error) {
       return rejectWithValue(error instanceof Error ? error.message : 'Failed to fetch categories');
@@ -110,11 +117,13 @@ export const fetchProductsByCategory = createAsyncThunk(
     sort?: SortOption;
   }, { rejectWithValue }) => {
     try {
-      const response = await productService.getProductsByCategory(categoryId, filter, { page, limit, sort });
+      const backendResponse = await productService.getProductsByCategory(categoryId, filter, { page, limit, sort });
+      const transformedResponse = transformPaginatedProductsFromBackend(backendResponse);
+      
       return {
-        products: response.data,
-        totalProducts: response.meta.total,
-        totalPages: response.meta.totalPages
+        products: transformedResponse.data,
+        totalProducts: transformedResponse.meta.total,
+        totalPages: transformedResponse.meta.totalPages
       };
     } catch (error) {
       return rejectWithValue(error instanceof Error ? error.message : 'Failed to fetch products by category');
@@ -137,11 +146,13 @@ export const fetchFeaturedProducts = createAsyncThunk(
     sort?: SortOption;
   }, { rejectWithValue }) => {
     try {
-      const response = await productService.getFeaturedProducts({ page, limit, sort });
+      const backendResponse = await productService.getFeaturedProducts({ page, limit, sort });
+      const transformedResponse = transformPaginatedProductsFromBackend(backendResponse);
+      
       return {
-        products: response.data,
-        totalProducts: response.meta.total,
-        totalPages: response.meta.totalPages
+        products: transformedResponse.data,
+        totalProducts: transformedResponse.meta.total,
+        totalPages: transformedResponse.meta.totalPages
       };
     } catch (error) {
       return rejectWithValue(error instanceof Error ? error.message : 'Failed to fetch featured products');
@@ -168,11 +179,13 @@ export const searchProducts = createAsyncThunk(
     sort?: SortOption;
   }, { rejectWithValue }) => {
     try {
-      const response = await productService.searchProducts(query, filter, { page, limit, sort });
+      const backendResponse = await productService.searchProducts(query, filter, { page, limit, sort });
+      const transformedResponse = transformPaginatedProductsFromBackend(backendResponse);
+      
       return {
-        products: response.data,
-        totalProducts: response.meta.total,
-        totalPages: response.meta.totalPages
+        products: transformedResponse.data,
+        totalProducts: transformedResponse.meta.total,
+        totalPages: transformedResponse.meta.totalPages
       };
     } catch (error) {
       return rejectWithValue(error instanceof Error ? error.message : 'Failed to search products');
