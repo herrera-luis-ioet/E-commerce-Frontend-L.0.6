@@ -5,6 +5,17 @@ import type { RootState, AppDispatch } from './index';
 export const useAppDispatch = () => useDispatch<AppDispatch>();
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
+// Custom hooks for order state
+export const useOrders = () => useAppSelector((state) => state.orders.orders);
+export const useSelectedOrder = () => useAppSelector((state) => state.orders.selectedOrder);
+export const useOrderLoading = () => useAppSelector((state) => state.orders.loading);
+export const useOrderError = () => useAppSelector((state) => state.orders.error);
+export const useOrderInitialized = () => useAppSelector((state) => state.orders.initialized);
+export const useTotalOrders = () => useAppSelector((state) => state.orders.totalOrders);
+export const useOrderTotalPages = () => useAppSelector((state) => state.orders.totalPages);
+export const useOrderCurrentPage = () => useAppSelector((state) => state.orders.currentPage);
+export const useOrderItemsPerPage = () => useAppSelector((state) => state.orders.itemsPerPage);
+
 // Custom hooks for product state
 export const useProducts = () => useAppSelector((state) => state.products.products);
 export const useSelectedProduct = () => useAppSelector((state) => state.products.selectedProduct);
@@ -60,5 +71,28 @@ export const useProductFiltering = () => {
     searchQuery,
     categories,
     selectedCategory
+  };
+};
+
+// Combined hook for order management
+export const useOrderManagement = () => {
+  const orders = useOrders();
+  const selectedOrder = useSelectedOrder();
+  const loading = useOrderLoading();
+  const error = useOrderError();
+  const totalOrders = useTotalOrders();
+  const totalPages = useOrderTotalPages();
+  const currentPage = useOrderCurrentPage();
+  const itemsPerPage = useOrderItemsPerPage();
+  
+  return {
+    orders,
+    selectedOrder,
+    loading,
+    error,
+    totalOrders,
+    totalPages,
+    currentPage,
+    itemsPerPage
   };
 };
