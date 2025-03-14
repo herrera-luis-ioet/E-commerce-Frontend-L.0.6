@@ -122,6 +122,9 @@ run_tests() {
     echo "Running integration tests..."
     cd "$FRONTEND_DIR" || { echo "Error: Frontend directory not found"; exit 1; }
     
+    # Create test reports directory if it doesn't exist
+    mkdir -p test-reports
+    
     # Build the test command
     TEST_COMMAND="npm test"
     
@@ -143,6 +146,13 @@ run_tests() {
     
     # Store the test result
     TEST_RESULT=$?
+    
+    # Display report location if tests ran
+    if [ -d "test-reports" ] && [ "$(ls -A test-reports)" ]; then
+        echo ""
+        echo "📊 Test reports generated in: $(pwd)/test-reports"
+        echo "Latest report: $(ls -t test-reports | head -n1)"
+    fi
     
     return $TEST_RESULT
 }

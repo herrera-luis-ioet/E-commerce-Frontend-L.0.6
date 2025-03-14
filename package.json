@@ -35,6 +35,16 @@
       "react-app/jest"
     ]
   },
+  "jest": {
+    "reporters": [
+      "default",
+      ["<rootDir>/src/services/__tests__/integration/report-generator.ts", {
+        "outputDir": "./test-reports",
+        "consoleEnabled": true,
+        "htmlEnabled": true
+      }]
+    ]
+  },
   "browserslist": {
     "production": [
       ">0.2%",

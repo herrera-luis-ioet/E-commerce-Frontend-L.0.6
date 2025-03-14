@@ -13,6 +13,7 @@ const {
   transformOrderFromBackend, 
   transformOrderToBackend 
 } = require('../../../utils/dataTransformers');
+const { PerformanceTracker } = require('./report-generator');
 
 // Configure Jest to have a longer timeout for integration tests
 jest.setTimeout(30000);
@@ -226,8 +227,17 @@ describe('Order Service Integration Tests', () => {
         notes: 'Test order creation'
       };
       
+      // Start performance tracking
+      PerformanceTracker.startTest('Create New Order');
+      
       // Create the order using the order service
       const response = await orderService.createOrder(orderCreateData);
+      
+      // End performance tracking
+      PerformanceTracker.endTest('Create New Order', '/api/v1/orders');
+      
+      // Record API call performance
+      PerformanceTracker.recordApiCall('/api/v1/orders', response.meta?.responseTime || 0);
       
       // Verify the response
       expect(response.success).toBe(true);

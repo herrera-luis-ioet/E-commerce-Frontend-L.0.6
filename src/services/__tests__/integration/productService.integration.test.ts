@@ -10,6 +10,7 @@ const integrationTestSetup = require('./setup').default;
 const productService = require('../../productService').default;
 const { SortOption, ProductFilter } = require('../../../types/product.types');
 const { transformProductFromBackend } = require('../../../utils/dataTransformers');
+const { PerformanceTracker } = require('./report-generator');
 
 // Configure Jest to have a longer timeout for integration tests
 jest.setTimeout(30000);
@@ -136,8 +137,17 @@ describe('Product Service Integration Tests', () => {
       
       const createdProduct = await integrationTestSetup.createTestProduct(testProduct);
       
+      // Start performance tracking
+      PerformanceTracker.startTest('Fetch Product By ID');
+      
       // Fetch the product using the product service
       const response = await productService.getProductById(createdProduct.id.toString());
+      
+      // End performance tracking
+      PerformanceTracker.endTest('Fetch Product By ID', `/api/v1/products/${createdProduct.id}`);
+      
+      // Record API call performance
+      PerformanceTracker.recordApiCall(`/api/v1/products/${createdProduct.id}`, response.meta?.responseTime || 0);
       
       // Verify the response
       expect(response.success).toBe(true);
