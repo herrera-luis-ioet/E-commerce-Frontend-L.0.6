@@ -6,18 +6,18 @@
  * and includes cleanup utilities.
  */
 
-import axios, { AxiosInstance } from 'axios';
-import apiService from '../../api';
-import { Product } from '../../../types/product.types';
-import { Order, OrderCreate, OrderStatus } from '../../../types/order.types';
-import { Endpoints } from '../../../types/api.types';
+const axios = require('axios');
+const apiService = require('../../api').default;
+const { Product } = require('../../../types/product.types');
+const { OrderStatus } = require('../../../types/order.types');
+const { Endpoints } = require('../../../types/api.types');
 
 // API configuration for integration tests
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
 // Direct axios instance for test data setup and cleanup
 // This bypasses the frontend apiService to directly interact with the backend
-const testApiClient: AxiosInstance = axios.create({
+const testApiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
   headers: {
