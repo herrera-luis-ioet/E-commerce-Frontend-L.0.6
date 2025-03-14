@@ -16,7 +16,7 @@ import {
  * Default API configuration
  */
 const API_CONFIG = {
-  baseURL: process.env.REACT_APP_API_URL || 'https://8000_172_31_37_95.workspace.develop.kavia.ai',
+  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8000',
   timeout: 30000, // 30 seconds
   headers: {
     'Content-Type': 'application/json',

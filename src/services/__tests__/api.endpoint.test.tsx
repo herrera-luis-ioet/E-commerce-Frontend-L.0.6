@@ -26,7 +26,7 @@ describe('API Service Endpoint URL Tests', () => {
     // Check that axios.create was called with the correct baseURL
     expect(axios.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        baseURL: 'https://8000_172_31_44_95.workspace.develop.kavia.ai',
+        baseURL: 'http://localhost:8000',
       })
     );
   });
@@ -54,7 +54,7 @@ describe('API Service Endpoint URL Tests', () => {
     // Verify axios.create was called with the correct baseURL
     expect(axios.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        baseURL: 'https://8000_172_31_44_95.workspace.develop.kavia.ai',
+        baseURL: 'http://localhost:8000',
       })
     );
     
@@ -66,6 +66,6 @@ describe('API Service Endpoint URL Tests', () => {
     );
     
     // The full URL that will be used is baseURL + url = 
-    // https://8000_172_31_44_95.workspace.develop.kavia.ai/api/v1/products
+    // http://localhost:8000/api/v1/products
   });
 });
