@@ -20,6 +20,23 @@ interface ProductPaginationParams {
 }
 
 /**
+ * Convert frontend pagination parameters to backend format
+ * @param pagination - Frontend pagination parameters
+ * @returns Backend pagination parameters
+ */
+const convertPaginationParams = (pagination?: ProductPaginationParams) => {
+  const page = pagination?.page || 1;
+  const limit = pagination?.limit || 10;
+  // Backend uses skip/limit instead of page/limit
+  const skip = (page - 1) * limit;
+  
+  return {
+    skip,
+    limit
+  };
+};
+
+/**
  * ProductService class for handling product-related API requests
  */
 class ProductService {
@@ -34,12 +51,13 @@ class ProductService {
     filter?: ProductFilter,
     pagination?: ProductPaginationParams
   ) {
+    const paginationParams = convertPaginationParams(pagination);
+    
     const params = {
       params: {
         ...filter,
-        page: pagination?.page || 1,
-        limit: pagination?.limit || 10,
-        sort: pagination?.sort || SortOption.NEWEST,
+        skip: paginationParams.skip,
+        limit: paginationParams.limit,
       },
     };
 
@@ -54,6 +72,35 @@ class ProductService {
    */
   public async getProductById(id: string) {
     return apiService.get<Product>(`${Endpoints.PRODUCT_BY_ID}${id}`);
+  }
+
+  /**
+   * PUBLIC_INTERFACE
+   * Fetch a single product by SKU
+   * @param sku - Product SKU
+   * @returns Promise resolving to a product
+   */
+  public async getProductBySku(sku: string) {
+    return apiService.get<Product>(`${Endpoints.PRODUCT_BY_SKU}${sku}`);
+  }
+
+  /**
+   * PUBLIC_INTERFACE
+   * Fetch active products with optional pagination
+   * @param pagination - Pagination parameters
+   * @returns Promise resolving to an array of active products with pagination metadata
+   */
+  public async getActiveProducts(pagination?: ProductPaginationParams) {
+    const paginationParams = convertPaginationParams(pagination);
+    
+    const params = {
+      params: {
+        skip: paginationParams.skip,
+        limit: paginationParams.limit,
+      },
+    };
+
+    return apiService.getPaginated<Product>(Endpoints.ACTIVE_PRODUCTS, params);
   }
 
   /**
@@ -109,12 +156,13 @@ class ProductService {
     filter?: Omit<ProductFilter, 'category'>,
     pagination?: ProductPaginationParams
   ) {
+    const paginationParams = convertPaginationParams(pagination);
+    
     const params = {
       params: {
         ...filter,
-        page: pagination?.page || 1,
-        limit: pagination?.limit || 10,
-        sort: pagination?.sort || SortOption.NEWEST,
+        skip: paginationParams.skip,
+        limit: paginationParams.limit,
       },
     };
 
@@ -128,12 +176,17 @@ class ProductService {
    * @returns Promise resolving to an array of featured products with pagination metadata
    */
   public async getFeaturedProducts(pagination?: ProductPaginationParams) {
+    // Since the backend doesn't have a dedicated featured products endpoint,
+    // we'll use the filter parameter with the main products endpoint
+    const paginationParams = convertPaginationParams(pagination);
+    
     const params = {
       params: {
-        featured: true,
-        page: pagination?.page || 1,
-        limit: pagination?.limit || 10,
-        sort: pagination?.sort || SortOption.NEWEST,
+        is_active: true, // Only get active products
+        skip: paginationParams.skip,
+        limit: paginationParams.limit,
+        // Note: Backend doesn't support 'featured' filter directly
+        // This is a placeholder that would need backend support
       },
     };
 
@@ -147,12 +200,17 @@ class ProductService {
    * @returns Promise resolving to an array of products on sale with pagination metadata
    */
   public async getProductsOnSale(pagination?: ProductPaginationParams) {
+    // Since the backend doesn't have a dedicated on-sale products endpoint,
+    // we'll use the filter parameter with the main products endpoint
+    const paginationParams = convertPaginationParams(pagination);
+    
     const params = {
       params: {
-        onSale: true,
-        page: pagination?.page || 1,
-        limit: pagination?.limit || 10,
-        sort: pagination?.sort || SortOption.PRICE_LOW_TO_HIGH,
+        is_active: true, // Only get active products
+        skip: paginationParams.skip,
+        limit: paginationParams.limit,
+        // Note: Backend doesn't support 'onSale' filter directly
+        // This is a placeholder that would need backend support
       },
     };
 
@@ -172,13 +230,17 @@ class ProductService {
     filter?: Omit<ProductFilter, 'searchQuery'>,
     pagination?: ProductPaginationParams
   ) {
+    // Since the backend doesn't have a dedicated search endpoint,
+    // we'll use the filter parameter with the main products endpoint
+    const paginationParams = convertPaginationParams(pagination);
+    
     const params = {
       params: {
         ...filter,
-        searchQuery: query,
-        page: pagination?.page || 1,
-        limit: pagination?.limit || 10,
-        sort: pagination?.sort || SortOption.NEWEST,
+        // Note: Backend doesn't support 'searchQuery' filter directly
+        // This is a placeholder that would need backend support
+        skip: paginationParams.skip,
+        limit: paginationParams.limit,
       },
     };
 
@@ -226,28 +288,27 @@ class ProductService {
     filter: ProductFilter,
     pagination?: ProductPaginationParams
   ) {
+    const paginationParams = convertPaginationParams(pagination);
+    
     // Convert filter object to query parameters
     const filterParams: Record<string, string | number | boolean | undefined> = {};
     
-    // Process each filter property
-    if (filter.categoryId) filterParams.categoryId = filter.categoryId;
+    // Process each filter property and map to backend parameters
     if (filter.category) filterParams.category = filter.category;
+    // Note: Backend doesn't directly support these filters
+    // These are placeholders that would need backend support
     if (filter.minPrice !== undefined) filterParams.minPrice = filter.minPrice;
     if (filter.maxPrice !== undefined) filterParams.maxPrice = filter.maxPrice;
-    if (filter.inStock !== undefined) filterParams.inStock = filter.inStock;
-    if (filter.searchQuery) filterParams.searchQuery = filter.searchQuery;
-    if (filter.brand) filterParams.brand = filter.brand;
-    if (filter.rating !== undefined) filterParams.rating = filter.rating;
-    if (filter.featured !== undefined) filterParams.featured = filter.featured;
-    if (filter.onSale !== undefined) filterParams.onSale = filter.onSale;
+    if (filter.inStock !== undefined) filterParams.stock_quantity = filter.inStock ? 1 : 0;
+    if (filter.searchQuery) filterParams.search = filter.searchQuery;
     if (filter.tags && filter.tags.length > 0) filterParams.tags = filter.tags.join(',');
 
     const params = {
       params: {
         ...filterParams,
-        page: pagination?.page || 1,
-        limit: pagination?.limit || 10,
-        sort: pagination?.sort || SortOption.NEWEST,
+        skip: paginationParams.skip,
+        limit: paginationParams.limit,
+        is_active: true, // Only get active products by default
       },
     };
 
