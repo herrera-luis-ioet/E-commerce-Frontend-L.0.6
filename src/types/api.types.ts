@@ -90,20 +90,26 @@ export enum Endpoints {
   BASE = '/api/v1',
   /** Products endpoint */
   PRODUCTS = '/api/v1/products',
-  /** Categories endpoint */
-  CATEGORIES = '/api/v1/categories',
+  /** Orders endpoint */
+  ORDERS = '/api/v1/orders',
   /** Product by ID endpoint (append product ID) */
   PRODUCT_BY_ID = '/api/v1/products/',
-  /** Category by ID endpoint (append category ID) */
-  CATEGORY_BY_ID = '/api/v1/categories/',
-  /** Featured products endpoint */
-  FEATURED_PRODUCTS = '/api/v1/products/featured',
-  /** Products on sale endpoint */
-  SALE_PRODUCTS = '/api/v1/products/sale',
-  /** Search products endpoint */
-  SEARCH_PRODUCTS = '/api/v1/products/search',
-  /** Product reviews endpoint (append product ID) */
-  PRODUCT_REVIEWS = '/api/v1/products/reviews/',
+  /** Order by ID endpoint (append order ID) */
+  ORDER_BY_ID = '/api/v1/orders/',
+  /** Active products endpoint */
+  ACTIVE_PRODUCTS = '/api/v1/products/active',
+  /** Products by category endpoint (append category name) */
+  PRODUCTS_BY_CATEGORY = '/api/v1/products/category/',
+  /** Product by SKU endpoint (append SKU) */
+  PRODUCT_BY_SKU = '/api/v1/products/sku/',
+  /** Orders by status endpoint (append status) */
+  ORDERS_BY_STATUS = '/api/v1/orders/status/',
+  /** Orders by date range endpoint */
+  ORDERS_BY_DATE_RANGE = '/api/v1/orders/date-range',
+  /** Update order status endpoint (append order ID) */
+  UPDATE_ORDER_STATUS = '/api/v1/orders/',
+  /** Health check endpoint */
+  HEALTH = '/api/v1/health',
 }
 
 /**

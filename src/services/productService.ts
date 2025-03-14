@@ -60,9 +60,20 @@ class ProductService {
    * PUBLIC_INTERFACE
    * Fetch all categories
    * @returns Promise resolving to an array of categories
+   * @deprecated The backend API doesn't have a dedicated categories endpoint
    */
   public async getCategories() {
-    return apiService.get<Category[]>(Endpoints.CATEGORIES);
+    // This is a placeholder since the backend API doesn't have a dedicated categories endpoint
+    // In a real implementation, we would need to extract unique categories from products
+    console.warn('Categories endpoint is not implemented in the backend API');
+    
+    // Return an empty response with the expected structure
+    return {
+      success: true,
+      statusCode: 200,
+      data: [],
+      message: 'Categories are not available as a dedicated endpoint'
+    };
   }
 
   /**
@@ -70,35 +81,44 @@ class ProductService {
    * Fetch a single category by ID
    * @param id - Category ID
    * @returns Promise resolving to a category
+   * @deprecated The backend API doesn't have a dedicated categories endpoint
    */
   public async getCategoryById(id: string) {
-    return apiService.get<Category>(`${Endpoints.CATEGORY_BY_ID}${id}`);
+    // This is a placeholder since the backend API doesn't have a dedicated categories endpoint
+    console.warn('Category by ID endpoint is not implemented in the backend API');
+    
+    // Return an empty response with the expected structure
+    return {
+      success: true,
+      statusCode: 200,
+      data: null,
+      message: 'Category by ID is not available as a dedicated endpoint'
+    };
   }
 
   /**
    * PUBLIC_INTERFACE
-   * Fetch products by category ID with optional filtering, sorting, and pagination
-   * @param categoryId - Category ID
+   * Fetch products by category with optional filtering, sorting, and pagination
+   * @param category - Category name
    * @param filter - Additional product filter options
    * @param pagination - Pagination parameters
    * @returns Promise resolving to an array of products with pagination metadata
    */
   public async getProductsByCategory(
-    categoryId: string,
-    filter?: Omit<ProductFilter, 'categoryId'>,
+    category: string,
+    filter?: Omit<ProductFilter, 'category'>,
     pagination?: ProductPaginationParams
   ) {
     const params = {
       params: {
         ...filter,
-        categoryId,
         page: pagination?.page || 1,
         limit: pagination?.limit || 10,
         sort: pagination?.sort || SortOption.NEWEST,
       },
     };
 
-    return apiService.getPaginated<Product>(Endpoints.PRODUCTS, params);
+    return apiService.getPaginated<Product>(`${Endpoints.PRODUCTS_BY_CATEGORY}${category}`, params);
   }
 
   /**
@@ -110,13 +130,14 @@ class ProductService {
   public async getFeaturedProducts(pagination?: ProductPaginationParams) {
     const params = {
       params: {
+        featured: true,
         page: pagination?.page || 1,
         limit: pagination?.limit || 10,
         sort: pagination?.sort || SortOption.NEWEST,
       },
     };
 
-    return apiService.getPaginated<Product>(Endpoints.FEATURED_PRODUCTS, params);
+    return apiService.getPaginated<Product>(Endpoints.PRODUCTS, params);
   }
 
   /**
@@ -128,13 +149,14 @@ class ProductService {
   public async getProductsOnSale(pagination?: ProductPaginationParams) {
     const params = {
       params: {
+        onSale: true,
         page: pagination?.page || 1,
         limit: pagination?.limit || 10,
         sort: pagination?.sort || SortOption.PRICE_LOW_TO_HIGH,
       },
     };
 
-    return apiService.getPaginated<Product>(Endpoints.SALE_PRODUCTS, params);
+    return apiService.getPaginated<Product>(Endpoints.PRODUCTS, params);
   }
 
   /**
@@ -160,7 +182,7 @@ class ProductService {
       },
     };
 
-    return apiService.getPaginated<Product>(Endpoints.SEARCH_PRODUCTS, params);
+    return apiService.getPaginated<Product>(Endpoints.PRODUCTS, params);
   }
 
   /**
@@ -169,17 +191,28 @@ class ProductService {
    * @param productId - Product ID
    * @param pagination - Pagination parameters
    * @returns Promise resolving to an array of reviews with pagination metadata
+   * @deprecated The backend API doesn't currently support product reviews
    */
   public async getProductReviews(productId: string, pagination?: ProductPaginationParams) {
-    const params = {
-      params: {
-        page: pagination?.page || 1,
-        limit: pagination?.limit || 10,
-        sort: SortOption.NEWEST,
+    // This is a placeholder since the backend API doesn't currently support product reviews
+    // In a real implementation, this would call an appropriate endpoint
+    console.warn('Product reviews endpoint is not implemented in the backend API');
+    
+    // Return an empty response with the expected structure
+    return {
+      success: true,
+      statusCode: 200,
+      data: [],
+      meta: {
+        currentPage: 1,
+        itemsPerPage: 10,
+        total: 0,
+        totalPages: 0,
+        hasNextPage: false,
+        hasPrevPage: false,
       },
+      message: 'Product reviews are not available'
     };
-
-    return apiService.getPaginated<any>(`${Endpoints.PRODUCT_REVIEWS}${productId}`, params);
   }
 
   /**
