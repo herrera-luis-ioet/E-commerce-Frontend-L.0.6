@@ -83,8 +83,8 @@ interface BackendPaginatedResponse<T> {
  * @returns Product in frontend format
  */
 export const transformProductFromBackend = (backendProduct: BackendProduct): Product => {
-  // Parse tags from comma-separated string to array
-  const tags = backendProduct.tags ? backendProduct.tags.split(',').map(tag => tag.trim()) : [];
+  // Parse tags from comma-separated string to array, with null/undefined checks
+  const tags = backendProduct.tags ? backendProduct.tags.split(',').map(tag => tag.trim()).filter(Boolean) : [];
   
   // Use the image as both mainImage and the first item in images array
   const mainImage = backendProduct.image || '';
@@ -118,8 +118,8 @@ export const transformProductFromBackend = (backendProduct: BackendProduct): Pro
  * @returns Product in backend format
  */
 export const transformProductToBackend = (frontendProduct: Partial<Product>): Partial<BackendProduct> => {
-  // Join tags array into comma-separated string
-  const tags = frontendProduct.tags ? frontendProduct.tags.join(',') : null;
+  // Join tags array into comma-separated string, with null/undefined checks
+  const tags = frontendProduct.tags && Array.isArray(frontendProduct.tags) ? frontendProduct.tags.join(',') : null;
   
   return {
     name: frontendProduct.name,
