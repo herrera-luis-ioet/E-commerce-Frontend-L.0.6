@@ -100,4 +100,31 @@ describe('API Service Endpoint URL Tests', () => {
     // The full URL that will be used is baseURL + url = 
     // http://localhost:8000/api/v1/products
   });
+
+  test('getPaginated should use transformation function when provided', async () => {
+    // Mock data
+    const mockData = { items: [{ id: 1, name: 'Test' }], meta: { page: 1, per_page: 10, total: 1, total_pages: 1 } };
+    const mockTransformedData = { success: true, data: [{ id: '1', name: 'Transformed' }], meta: { currentPage: 1, itemsPerPage: 10, total: 1, totalPages: 1, hasNextPage: false, hasPrevPage: false }, statusCode: 200 };
+    
+    // Mock transform function
+    const mockTransform = jest.fn().mockReturnValue(mockTransformedData);
+    
+    // Mock response
+    mockedAxios.request.mockResolvedValueOnce({
+      data: mockData,
+      status: 200,
+      statusText: 'OK',
+      headers: {},
+      config: {},
+    });
+    
+    // Make request with transform function
+    const result = await apiService.getPaginated(Endpoints.PRODUCTS, {}, mockTransform);
+    
+    // Verify transform function was called with the correct data
+    expect(mockTransform).toHaveBeenCalledWith(mockData);
+    
+    // Verify the result is the transformed data
+    expect(result).toEqual(mockTransformedData);
+  });
 });

@@ -4,6 +4,12 @@ import apiService from '../api';
 import orderService from '../orderService';
 import { Endpoints } from '../../types/api.types';
 import { OrderStatus } from '../../types/order.types';
+import { transformPaginatedOrdersFromBackend } from '../../utils/dataTransformers';
+
+// Mock the transformPaginatedOrdersFromBackend function
+jest.mock('../../utils/dataTransformers', () => ({
+  transformPaginatedOrdersFromBackend: jest.fn(data => data)
+}));
 
 // Mock axios
 const mockAxios = new MockAdapter(axios);

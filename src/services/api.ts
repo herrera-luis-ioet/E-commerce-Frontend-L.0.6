@@ -251,10 +251,22 @@ class ApiService {
    * Make a GET request for paginated data
    * @param url - API endpoint URL
    * @param params - Request parameters
+   * @param transform - Optional function to transform the response data
    * @returns Promise resolving to the paginated API response
    */
-  public async getPaginated<T>(url: string, params?: RequestParams): Promise<PaginatedResponse<T>> {
-    const response = await this.get<T[]>(url, params);
+  public async getPaginated<T, U = T>(
+    url: string, 
+    params?: RequestParams, 
+    transform?: (data: any) => PaginatedResponse<T>
+  ): Promise<PaginatedResponse<T>> {
+    const response = await this.get<any>(url, params);
+    
+    // If a transform function is provided, use it to transform the response
+    if (transform) {
+      return transform(response.data);
+    }
+    
+    // Otherwise, return the response as is
     return response as unknown as PaginatedResponse<T>;
   }
 }

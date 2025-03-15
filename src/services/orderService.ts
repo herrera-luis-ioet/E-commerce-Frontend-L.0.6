@@ -11,6 +11,7 @@ import {
   OrderFilter,
   OrderPaginationParams
 } from '../types/order.types';
+import { transformPaginatedOrdersFromBackend } from '../utils/dataTransformers';
 
 /**
  * Convert frontend pagination parameters to backend format
@@ -49,7 +50,11 @@ class OrderService {
       },
     };
 
-    return apiService.getPaginated<Order>(Endpoints.ORDERS, params);
+    return apiService.getPaginated<Order>(
+      Endpoints.ORDERS, 
+      params,
+      transformPaginatedOrdersFromBackend
+    );
   }
 
   /**
@@ -69,7 +74,11 @@ class OrderService {
       },
     };
 
-    return apiService.getPaginated<Order>(`${Endpoints.ORDERS_BY_STATUS}${status}`, params);
+    return apiService.getPaginated<Order>(
+      `${Endpoints.ORDERS_BY_STATUS}${status}`, 
+      params,
+      transformPaginatedOrdersFromBackend
+    );
   }
 
   /**
@@ -96,7 +105,11 @@ class OrderService {
       },
     };
 
-    return apiService.getPaginated<Order>(Endpoints.ORDERS_BY_DATE_RANGE, params);
+    return apiService.getPaginated<Order>(
+      Endpoints.ORDERS_BY_DATE_RANGE, 
+      params,
+      transformPaginatedOrdersFromBackend
+    );
   }
 
   /**
@@ -180,7 +193,11 @@ class OrderService {
       },
     };
 
-    return apiService.getPaginated<Order>(Endpoints.ORDERS, params);
+    return apiService.getPaginated<Order>(
+      Endpoints.ORDERS, 
+      params,
+      transformPaginatedOrdersFromBackend
+    );
   }
 }
 
