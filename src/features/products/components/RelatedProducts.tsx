@@ -41,7 +41,9 @@ const RelatedProducts: React.FC<RelatedProductsProps> = ({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Filter out the current product from related products
-  const filteredProducts = products.filter(product => product.id !== currentProductId);
+  const filteredProducts = products && Array.isArray(products) 
+    ? products.filter(product => product.id !== currentProductId)
+    : [];
 
   // Scroll functions
   const scrollLeft = () => {
@@ -80,7 +82,7 @@ const RelatedProducts: React.FC<RelatedProductsProps> = ({
   }
 
   // Handle empty state
-  if (filteredProducts.length === 0) {
+  if (!filteredProducts || filteredProducts.length === 0) {
     return (
       <Card className={`${className}`} title="Related Products">
         <div className="text-center text-gray-500 py-8">
@@ -122,7 +124,7 @@ const RelatedProducts: React.FC<RelatedProductsProps> = ({
         className="flex overflow-x-auto pb-4 scrollbar-hide -mx-6 px-6 space-x-4"
         style={{ scrollbarWidth: 'none' as 'none', msOverflowStyle: 'none' as any }}
       >
-        {filteredProducts.map(product => (
+        {Array.isArray(filteredProducts) && filteredProducts.map(product => (
           <div key={product.id} className="flex-shrink-0 w-64">
             <ProductCard
               product={product}
