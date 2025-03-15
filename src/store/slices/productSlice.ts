@@ -12,8 +12,7 @@ import {
 } from '../../types/product.types';
 import productService from '../../services/productService';
 import { 
-  transformProductFromBackend, 
-  transformPaginatedProductsFromBackend 
+  transformProductFromBackend
 } from '../../utils/dataTransformers';
 
 /**
@@ -53,13 +52,12 @@ export const fetchProducts = createAsyncThunk(
     sort?: SortOption;
   }, { rejectWithValue }) => {
     try {
-      const backendResponse = await productService.getProducts(filter, { page, limit, sort });
-      const transformedResponse = transformPaginatedProductsFromBackend(backendResponse);
+      const response = await productService.getProducts(filter, { page, limit, sort });
       
       return {
-        products: transformedResponse.data,
-        totalProducts: transformedResponse.meta.total,
-        totalPages: transformedResponse.meta.totalPages
+        products: response.data,
+        totalProducts: response.meta.total,
+        totalPages: response.meta.totalPages
       };
     } catch (error) {
       return rejectWithValue(error instanceof Error ? error.message : 'Failed to fetch products');
@@ -117,13 +115,12 @@ export const fetchProductsByCategory = createAsyncThunk(
     sort?: SortOption;
   }, { rejectWithValue }) => {
     try {
-      const backendResponse = await productService.getProductsByCategory(categoryId, filter, { page, limit, sort });
-      const transformedResponse = transformPaginatedProductsFromBackend(backendResponse);
+      const response = await productService.getProductsByCategory(categoryId, filter, { page, limit, sort });
       
       return {
-        products: transformedResponse.data,
-        totalProducts: transformedResponse.meta.total,
-        totalPages: transformedResponse.meta.totalPages
+        products: response.data,
+        totalProducts: response.meta.total,
+        totalPages: response.meta.totalPages
       };
     } catch (error) {
       return rejectWithValue(error instanceof Error ? error.message : 'Failed to fetch products by category');
@@ -146,13 +143,12 @@ export const fetchFeaturedProducts = createAsyncThunk(
     sort?: SortOption;
   }, { rejectWithValue }) => {
     try {
-      const backendResponse = await productService.getFeaturedProducts({ page, limit, sort });
-      const transformedResponse = transformPaginatedProductsFromBackend(backendResponse);
+      const response = await productService.getFeaturedProducts({ page, limit, sort });
       
       return {
-        products: transformedResponse.data,
-        totalProducts: transformedResponse.meta.total,
-        totalPages: transformedResponse.meta.totalPages
+        products: response.data,
+        totalProducts: response.meta.total,
+        totalPages: response.meta.totalPages
       };
     } catch (error) {
       return rejectWithValue(error instanceof Error ? error.message : 'Failed to fetch featured products');
@@ -179,13 +175,12 @@ export const searchProducts = createAsyncThunk(
     sort?: SortOption;
   }, { rejectWithValue }) => {
     try {
-      const backendResponse = await productService.searchProducts(query, filter, { page, limit, sort });
-      const transformedResponse = transformPaginatedProductsFromBackend(backendResponse);
+      const response = await productService.searchProducts(query, filter, { page, limit, sort });
       
       return {
-        products: transformedResponse.data,
-        totalProducts: transformedResponse.meta.total,
-        totalPages: transformedResponse.meta.totalPages
+        products: response.data,
+        totalProducts: response.meta.total,
+        totalPages: response.meta.totalPages
       };
     } catch (error) {
       return rejectWithValue(error instanceof Error ? error.message : 'Failed to search products');
