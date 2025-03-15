@@ -56,10 +56,10 @@ const ProductCatalogManager: React.FC = () => {
   // Fetch products when component mounts or when filters/pagination/sorting changes
   useEffect(() => {
     dispatch(fetchProducts({
-      filter: filters,
-      page: currentPage,
-      limit: itemsPerPage,
-      sort: sortOption
+      filter: filters || {},
+      page: currentPage || 1,
+      limit: itemsPerPage || 10,
+      sort: sortOption || 'newest'
     }));
   }, [dispatch, filters, currentPage, itemsPerPage, sortOption, searchQuery]);
 
@@ -97,7 +97,8 @@ const ProductCatalogManager: React.FC = () => {
       );
     }
 
-    if (products.length === 0) {
+    // Add null check for products array
+    if (!products || products.length === 0) {
       return (
         <div className="text-center py-10">
           <h3 className="text-lg font-medium text-gray-900">No products found</h3>
@@ -108,7 +109,7 @@ const ProductCatalogManager: React.FC = () => {
       );
     }
 
-    return viewMode === 'grid' ? (
+    return (viewMode === 'grid' || !viewMode) ? (
       <ProductGrid products={products} isLoading={loading} error={error || undefined} />
     ) : (
       <ProductList products={products} isLoading={loading} error={error || undefined} showActions={true} />
@@ -147,7 +148,7 @@ const ProductCatalogManager: React.FC = () => {
         <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex items-baseline justify-between border-b border-gray-200 pb-6 pt-6">
             <h1 className="text-2xl font-bold tracking-tight text-gray-900">
-              {selectedCategory ? selectedCategory.name : 'All Products'}
+              {selectedCategory && selectedCategory.name ? selectedCategory.name : 'All Products'}
             </h1>
 
             <div className="flex items-center">
@@ -157,7 +158,7 @@ const ProductCatalogManager: React.FC = () => {
               <div className="ml-4 flex items-center">
                 <button
                   type="button"
-                  className={`p-2 text-gray-400 hover:text-gray-500 ${viewMode === 'grid' ? 'bg-gray-100 text-gray-900' : ''}`}
+                  className={`p-2 text-gray-400 hover:text-gray-500 ${viewMode === 'grid' || !viewMode ? 'bg-gray-100 text-gray-900' : ''}`}
                   onClick={() => handleViewModeToggle('grid')}
                 >
                   <span className="sr-only">Grid view</span>
@@ -212,17 +213,17 @@ const ProductCatalogManager: React.FC = () => {
               
               {/* Product count */}
               <div className="mb-4 text-sm text-gray-500">
-                {totalProducts} {totalProducts === 1 ? 'product' : 'products'}
+                {totalProducts !== undefined ? `${totalProducts} ${totalProducts === 1 ? 'product' : 'products'}` : 'Loading products...'}
               </div>
               
               {/* Product display */}
               {ProductDisplay}
               
               {/* Pagination */}
-              {totalPages > 1 && (
+              {totalPages !== undefined && totalPages > 1 && (
                 <div className="mt-8 flex justify-center">
                   <Pagination 
-                    currentPage={currentPage} 
+                    currentPage={currentPage || 1} 
                     totalPages={totalPages} 
                     onPageChange={handlePageChange} 
                   />
