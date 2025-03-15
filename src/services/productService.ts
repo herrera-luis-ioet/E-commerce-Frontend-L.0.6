@@ -9,7 +9,7 @@ import {
   ProductFilter, 
   SortOption 
 } from '../types/product.types';
-import { transformPaginatedProductsFromBackend } from '../utils/dataTransformers';
+import { transformPaginatedProductsFromBackend, transformProductFromBackend } from '../utils/dataTransformers';
 
 /**
  * Interface for product pagination parameters
@@ -76,7 +76,17 @@ class ProductService {
    * @returns Promise resolving to a product
    */
   public async getProductById(id: string) {
-    return apiService.get<Product>(`${Endpoints.PRODUCT_BY_ID}${id}`);
+    const response = await apiService.get<any>(`${Endpoints.PRODUCT_BY_ID}${id}`);
+    
+    // Transform the backend response to frontend format
+    if (response.success && response.data) {
+      return {
+        ...response,
+        data: transformProductFromBackend(response.data)
+      };
+    }
+    
+    return response;
   }
 
   /**
@@ -86,7 +96,17 @@ class ProductService {
    * @returns Promise resolving to a product
    */
   public async getProductBySku(sku: string) {
-    return apiService.get<Product>(`${Endpoints.PRODUCT_BY_SKU}${sku}`);
+    const response = await apiService.get<any>(`${Endpoints.PRODUCT_BY_SKU}${sku}`);
+    
+    // Transform the backend response to frontend format
+    if (response.success && response.data) {
+      return {
+        ...response,
+        data: transformProductFromBackend(response.data)
+      };
+    }
+    
+    return response;
   }
 
   /**
