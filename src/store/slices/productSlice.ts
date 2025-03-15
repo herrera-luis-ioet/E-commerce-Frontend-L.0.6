@@ -11,9 +11,7 @@ import {
   ProductView
 } from '../../types/product.types';
 import productService from '../../services/productService';
-import { 
-  transformProductFromBackend
-} from '../../utils/dataTransformers';
+// No need to import transformProductFromBackend as it's handled by ProductService
 
 /**
  * Initial state for the product slice
@@ -73,7 +71,7 @@ export const fetchProductById = createAsyncThunk(
   async (id: string, { rejectWithValue }) => {
     try {
       const response = await productService.getProductById(id);
-      return transformProductFromBackend(response.data);
+      return response.data; // Data is already transformed by ProductService
     } catch (error) {
       return rejectWithValue(error instanceof Error ? error.message : 'Failed to fetch product');
     }
