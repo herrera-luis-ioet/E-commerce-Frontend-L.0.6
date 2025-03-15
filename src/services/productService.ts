@@ -9,6 +9,7 @@ import {
   ProductFilter, 
   SortOption 
 } from '../types/product.types';
+import { transformPaginatedProductsFromBackend } from '../utils/dataTransformers';
 
 /**
  * Interface for product pagination parameters
@@ -61,7 +62,11 @@ class ProductService {
       },
     };
 
-    return apiService.getPaginated<Product>(Endpoints.PRODUCTS, params);
+    return apiService.getPaginated<Product>(
+      Endpoints.PRODUCTS, 
+      params, 
+      transformPaginatedProductsFromBackend
+    );
   }
 
   /**
@@ -100,7 +105,11 @@ class ProductService {
       },
     };
 
-    return apiService.getPaginated<Product>(Endpoints.ACTIVE_PRODUCTS, params);
+    return apiService.getPaginated<Product>(
+      Endpoints.ACTIVE_PRODUCTS, 
+      params, 
+      transformPaginatedProductsFromBackend
+    );
   }
 
   /**
@@ -166,7 +175,11 @@ class ProductService {
       },
     };
 
-    return apiService.getPaginated<Product>(`${Endpoints.PRODUCTS_BY_CATEGORY}${category}`, params);
+    return apiService.getPaginated<Product>(
+      `${Endpoints.PRODUCTS_BY_CATEGORY}${category}`, 
+      params, 
+      transformPaginatedProductsFromBackend
+    );
   }
 
   /**
@@ -190,7 +203,11 @@ class ProductService {
       },
     };
 
-    return apiService.getPaginated<Product>(Endpoints.PRODUCTS, params);
+    return apiService.getPaginated<Product>(
+      Endpoints.PRODUCTS, 
+      params, 
+      transformPaginatedProductsFromBackend
+    );
   }
 
   /**
@@ -214,7 +231,11 @@ class ProductService {
       },
     };
 
-    return apiService.getPaginated<Product>(Endpoints.PRODUCTS, params);
+    return apiService.getPaginated<Product>(
+      Endpoints.PRODUCTS, 
+      params, 
+      transformPaginatedProductsFromBackend
+    );
   }
 
   /**
@@ -244,7 +265,11 @@ class ProductService {
       },
     };
 
-    return apiService.getPaginated<Product>(Endpoints.PRODUCTS, params);
+    return apiService.getPaginated<Product>(
+      Endpoints.PRODUCTS, 
+      params, 
+      transformPaginatedProductsFromBackend
+    );
   }
 
   /**
@@ -312,7 +337,11 @@ class ProductService {
       },
     };
 
-    return apiService.getPaginated<Product>(Endpoints.PRODUCTS, params);
+    return apiService.getPaginated<Product>(
+      Endpoints.PRODUCTS, 
+      params, 
+      transformPaginatedProductsFromBackend
+    );
   }
 }
 
