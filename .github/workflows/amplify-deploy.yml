@@ -48,23 +48,3 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
           AMPLIFY_APP_ID: ${{ secrets.AMPLIFY_APP_ID }}
-          
-      - name: Notify on success
-        if: success()
-        uses: rtCamp/action-slack-notify@v2
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          SLACK_CHANNEL: deployments
-          SLACK_COLOR: good
-          SLACK_TITLE: "✅ Successful Deployment to AWS Amplify"
-          SLACK_MESSAGE: "ProductCatalogManager has been successfully deployed to AWS Amplify"
-          
-      - name: Notify on failure
-        if: failure()
-        uses: rtCamp/action-slack-notify@v2
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          SLACK_CHANNEL: deployments
-          SLACK_COLOR: danger
-          SLACK_TITLE: "❌ Failed Deployment to AWS Amplify"
-          SLACK_MESSAGE: "ProductCatalogManager deployment to AWS Amplify has failed"
