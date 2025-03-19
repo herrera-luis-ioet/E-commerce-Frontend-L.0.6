@@ -28,6 +28,7 @@ jobs:
           REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
         run: npm run build
         
+      # Using the pre-installed AWS CLI in GitHub Actions runner
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -35,6 +36,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
           
+      # Verify the pre-installed AWS CLI version
       - name: Verify AWS CLI
         run: aws --version
           
@@ -44,14 +46,11 @@ jobs:
           # Create a deployment ZIP file
           zip -r build.zip build/
           
-          # Start the deployment job using AWS CLI
+          # Start the deployment job using pre-installed AWS CLI
           aws amplify start-deployment \
             --app-id ${{ secrets.AMPLIFY_APP_ID }} \
             --branch-name production \
             --source-url file://$(pwd)/build.zip
           
           echo "Deployment initiated successfully"
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
+        # AWS credentials are already configured by the aws-actions/configure-aws-credentials step
