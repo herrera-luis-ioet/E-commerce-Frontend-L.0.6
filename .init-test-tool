@@ -1,0 +1,4 @@
+{
+    "command": "npm test",
+    "working_directory": "/home/kavia/workspace/E-commerce-Frontend-L.0.6/productcatalogmanager"
+}
