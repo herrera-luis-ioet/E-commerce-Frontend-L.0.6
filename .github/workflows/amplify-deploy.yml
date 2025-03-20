@@ -50,7 +50,7 @@ jobs:
           aws amplify start-deployment \
             --app-id ${{ secrets.AMPLIFY_APP_ID }} \
             --branch-name production \
-            --source-url file://$(pwd)/build.zip
+            --source-url fileb://$(pwd)/build.zip
           
           echo "Deployment initiated successfully"
         # AWS credentials are already configured by the aws-actions/configure-aws-credentials step
