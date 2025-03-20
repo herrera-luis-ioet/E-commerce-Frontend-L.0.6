@@ -55,13 +55,11 @@ const ProductCatalogManager: React.FC = () => {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   // Fetch products when component mounts or when filters/pagination changes
-  // Note: sortOption is removed from dependencies as sorting is now handled client-side
   useEffect(() => {
     dispatch(fetchProducts({
       filter: filters,
       page: currentPage,
       limit: itemsPerPage
-      // sort option removed as we're handling sorting client-side now
     }));
   }, [dispatch, filters, currentPage, itemsPerPage, searchQuery]);
 
