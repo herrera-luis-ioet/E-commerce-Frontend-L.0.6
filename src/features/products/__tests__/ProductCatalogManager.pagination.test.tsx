@@ -7,6 +7,14 @@ import filterReducer from '../../../store/slices/filterSlice';
 import { ProductState } from '../../../types/product.types';
 import ProductCatalogManager from '../ProductCatalogManager';
 import { BrowserRouter } from 'react-router-dom';
+import { sortProducts } from '../../../utils/formatters';
+
+// Mock the sortProducts utility function
+jest.mock('../../../utils/formatters', () => ({
+  sortProducts: jest.fn().mockImplementation((products) => products),
+  formatPrice: jest.fn(),
+  formatPercentage: jest.fn()
+}));
 
 // Mock the components that are not relevant for this test
 jest.mock('../components/ProductGrid', () => ({
