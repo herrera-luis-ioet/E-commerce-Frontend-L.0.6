@@ -162,40 +162,82 @@ export const sortProducts = (
 
   switch (sortOption) {
     case SortOption.PRICE_LOW_TO_HIGH:
-      return sortedProducts.sort((a, b) => a.price - b.price);
+      return sortedProducts.sort((a, b) => {
+        // Handle undefined or null values
+        const priceA = a.price ?? 0;
+        const priceB = b.price ?? 0;
+        return priceA - priceB;
+      });
 
     case SortOption.PRICE_HIGH_TO_LOW:
-      return sortedProducts.sort((a, b) => b.price - a.price);
+      return sortedProducts.sort((a, b) => {
+        // Handle undefined or null values
+        const priceA = a.price ?? 0;
+        const priceB = b.price ?? 0;
+        return priceB - priceA;
+      });
 
     case SortOption.NAME_A_TO_Z:
-      return sortedProducts.sort((a, b) => a.name.localeCompare(b.name));
+      return sortedProducts.sort((a, b) => {
+        // Handle undefined or null values
+        const nameA = a.name ?? '';
+        const nameB = b.name ?? '';
+        return nameA.localeCompare(nameB);
+      });
 
     case SortOption.NAME_Z_TO_A:
-      return sortedProducts.sort((a, b) => b.name.localeCompare(a.name));
+      return sortedProducts.sort((a, b) => {
+        // Handle undefined or null values
+        const nameA = a.name ?? '';
+        const nameB = b.name ?? '';
+        return nameB.localeCompare(nameA);
+      });
 
     case SortOption.NEWEST:
-      return sortedProducts.sort((a, b) => 
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
+      return sortedProducts.sort((a, b) => {
+        // Handle undefined or null values
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return dateB - dateA;
+      });
 
     case SortOption.OLDEST:
-      return sortedProducts.sort((a, b) => 
-        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-      );
+      return sortedProducts.sort((a, b) => {
+        // Handle undefined or null values
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return dateA - dateB;
+      });
 
     case SortOption.HIGHEST_RATED:
-      return sortedProducts.sort((a, b) => b.rating - a.rating);
+      return sortedProducts.sort((a, b) => {
+        // Handle undefined or null values
+        const ratingA = a.rating ?? 0;
+        const ratingB = b.rating ?? 0;
+        return ratingB - ratingA;
+      });
 
     case SortOption.MOST_POPULAR:
-      return sortedProducts.sort((a, b) => b.ratingCount - a.ratingCount);
+      return sortedProducts.sort((a, b) => {
+        // Handle undefined or null values
+        const countA = a.ratingCount ?? 0;
+        const countB = b.ratingCount ?? 0;
+        return countB - countA;
+      });
 
     case SortOption.BEST_SELLING:
       // For best selling, we would typically need sales data
       // As a fallback, we can use a combination of rating and popularity
       return sortedProducts.sort((a, b) => {
+        // Handle undefined or null values
+        const ratingA = a.rating ?? 0;
+        const ratingB = b.rating ?? 0;
+        const countA = a.ratingCount ?? 0;
+        const countB = b.ratingCount ?? 0;
+        
         // Calculate a score based on rating and rating count
-        const scoreA = a.rating * Math.log(a.ratingCount + 1);
-        const scoreB = b.rating * Math.log(b.ratingCount + 1);
+        const scoreA = ratingA * Math.log(countA + 1);
+        const scoreB = ratingB * Math.log(countB + 1);
         return scoreB - scoreA;
       });
 
