@@ -40,16 +40,14 @@ export const fetchProducts = createAsyncThunk(
   async ({ 
     filter, 
     page = 1, 
-    limit = 12, 
-    sort = SortOption.NEWEST 
+    limit = 12
   }: { 
     filter?: ProductFilter; 
     page?: number; 
-    limit?: number; 
-    sort?: SortOption;
+    limit?: number;
   }, { rejectWithValue }) => {
     try {
-      const response = await productService.getProducts(filter, { page, limit, sort });
+      const response = await productService.getProducts(filter, { page, limit });
       return {
         products: response.data,
         totalProducts: response.meta?.total || response.data.length,
@@ -100,17 +98,15 @@ export const fetchProductsByCategory = createAsyncThunk(
     categoryId, 
     filter, 
     page = 1, 
-    limit = 12, 
-    sort = SortOption.NEWEST 
+    limit = 12
   }: { 
     categoryId: string; 
     filter?: Omit<ProductFilter, 'categoryId'>; 
     page?: number; 
-    limit?: number; 
-    sort?: SortOption;
+    limit?: number;
   }, { rejectWithValue }) => {
     try {
-      const response = await productService.getProductsByCategory(categoryId, filter, { page, limit, sort });
+      const response = await productService.getProductsByCategory(categoryId, filter, { page, limit });
       return {
         products: response.data,
         totalProducts: response.meta?.total || response.data.length,
@@ -129,15 +125,13 @@ export const fetchFeaturedProducts = createAsyncThunk(
   'products/fetchFeaturedProducts',
   async ({ 
     page = 1, 
-    limit = 12, 
-    sort = SortOption.NEWEST 
+    limit = 12
   }: { 
     page?: number; 
-    limit?: number; 
-    sort?: SortOption;
+    limit?: number;
   }, { rejectWithValue }) => {
     try {
-      const response = await productService.getFeaturedProducts({ page, limit, sort });
+      const response = await productService.getFeaturedProducts({ page, limit });
       return {
         products: response.data,
         totalProducts: response.meta?.total || response.data.length,
@@ -158,17 +152,15 @@ export const searchProducts = createAsyncThunk(
     query, 
     filter, 
     page = 1, 
-    limit = 12, 
-    sort = SortOption.NEWEST 
+    limit = 12
   }: { 
     query: string; 
     filter?: Omit<ProductFilter, 'searchQuery'>; 
     page?: number; 
-    limit?: number; 
-    sort?: SortOption;
+    limit?: number;
   }, { rejectWithValue }) => {
     try {
-      const response = await productService.searchProducts(query, filter, { page, limit, sort });
+      const response = await productService.searchProducts(query, filter, { page, limit });
       return {
         products: response.data,
         totalProducts: response.meta?.total || response.data.length,
