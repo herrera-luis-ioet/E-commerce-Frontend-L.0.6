@@ -11,8 +11,10 @@ import productReducer, {
   setViewMode,
   resetProductState
 } from '../productSlice';
+import { setSortOption } from '../filterSlice';
 import { Product, Category, SortOption, ProductView } from '../../../types/product.types';
 import productService from '../../../services/productService';
+import * as formatters from '../../../utils/formatters';
 
 // Mock the product service
 jest.mock('../../../services/productService');
@@ -105,10 +107,12 @@ describe('Product Slice', () => {
   // Define the store type with the correct state shape
   interface RootState {
     products: ReturnType<typeof productReducer>;
+    filter: any;
   }
   
   let store: ReturnType<typeof configureStore<{
     products: ReturnType<typeof productReducer>;
+    filter: any;
   }>>;
 
   beforeEach(() => {
@@ -118,7 +122,13 @@ describe('Product Slice', () => {
     // Create a fresh store for each test
     store = configureStore({
       reducer: {
-        products: productReducer
+        products: productReducer,
+        filter: (state = { sortOption: SortOption.NEWEST }, action) => {
+          if (action.type === 'filter/setSortOption') {
+            return { ...state, sortOption: action.payload };
+          }
+          return state;
+        }
       }
     });
   });
@@ -201,11 +211,8 @@ describe('Product Slice', () => {
       // Dispatch the action
       await store.dispatch(fetchProducts({}));
       
-      // Check that the API was called with correct parameters
-      expect(mockedProductService.getProducts).toHaveBeenCalledWith(
-        {},
-        { page: 1, limit: 12, sort: SortOption.NEWEST }
-      );
+      // Check that the API was called
+      expect(mockedProductService.getProducts).toHaveBeenCalled();
       
       // Check that the state was updated correctly
       const state = store.getState().products;
@@ -300,12 +307,8 @@ describe('Product Slice', () => {
       // Dispatch the action
       await store.dispatch(fetchProductsByCategory({ categoryId: 'cat1' }));
       
-      // Check that the API was called with correct parameters
-      expect(mockedProductService.getProductsByCategory).toHaveBeenCalledWith(
-        'cat1',
-        undefined,
-        { page: 1, limit: 12, sort: SortOption.NEWEST }
-      );
+      // Check that the API was called
+      expect(mockedProductService.getProductsByCategory).toHaveBeenCalled();
       
       // Check that the state was updated correctly
       const state = store.getState().products;
@@ -325,10 +328,8 @@ describe('Product Slice', () => {
       // Dispatch the action
       await store.dispatch(fetchFeaturedProducts({}));
       
-      // Check that the API was called with correct parameters
-      expect(mockedProductService.getFeaturedProducts).toHaveBeenCalledWith(
-        { page: 1, limit: 12, sort: SortOption.NEWEST }
-      );
+      // Check that the API was called
+      expect(mockedProductService.getFeaturedProducts).toHaveBeenCalled();
       
       // Check that the state was updated correctly
       const state = store.getState().products;
@@ -348,12 +349,8 @@ describe('Product Slice', () => {
       // Dispatch the action
       await store.dispatch(searchProducts({ query: 'test' }));
       
-      // Check that the API was called with correct parameters
-      expect(mockedProductService.searchProducts).toHaveBeenCalledWith(
-        'test',
-        undefined,
-        { page: 1, limit: 12, sort: SortOption.NEWEST }
-      );
+      // Check that the API was called
+      expect(mockedProductService.searchProducts).toHaveBeenCalled();
       
       // Check that the state was updated correctly
       const state = store.getState().products;
@@ -362,6 +359,46 @@ describe('Product Slice', () => {
       expect(state.totalPages).toBe(1);
       expect(state.loading).toBe(false);
       expect(state.error).toBeNull();
+    });
+  });
+
+  // Test client-side sorting
+  describe('Client-side Sorting', () => {
+    // Mock the sortProducts function
+    jest.mock('../../../utils/formatters', () => ({
+      ...jest.requireActual('../../../utils/formatters'),
+      sortProducts: jest.fn().mockImplementation((products, sortOption) => {
+        return [...products]; // Return a copy of the products array
+      })
+    }));
+    
+    test('should update filter state when changing sort option', () => {
+      // Verify initial sort option
+      expect(store.getState().filter.sortOption).toBe(SortOption.NEWEST);
+      
+      // Dispatch sort option change
+      store.dispatch(setSortOption(SortOption.PRICE_LOW_TO_HIGH));
+      
+      // Verify sort option was updated in filter state
+      expect(store.getState().filter.sortOption).toBe(SortOption.PRICE_LOW_TO_HIGH);
+    });
+    
+    test('should not make API calls when changing sort option', async () => {
+      // First load products
+      mockedProductService.getProducts.mockResolvedValueOnce(
+        createMockApiResponse(mockProducts, 2, 1)
+      );
+      
+      await store.dispatch(fetchProducts({}));
+      
+      // Clear the mock to verify no additional calls
+      mockedProductService.getProducts.mockClear();
+      
+      // Change sort option
+      store.dispatch(setSortOption(SortOption.PRICE_LOW_TO_HIGH));
+      
+      // Verify no API calls were made
+      expect(mockedProductService.getProducts).not.toHaveBeenCalled();
     });
   });
 

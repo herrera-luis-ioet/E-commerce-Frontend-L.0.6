@@ -1,16 +1,33 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import ProductCatalogManager from '../ProductCatalogManager';
 import productReducer, { fetchProducts } from '../../../store/slices/productSlice';
-import filterReducer from '../../../store/slices/filterSlice';
+import filterReducer, { setSortOption } from '../../../store/slices/filterSlice';
 import productService from '../../../services/productService';
 import { BrowserRouter } from 'react-router-dom';
+import { SortOption } from '../../../types/product.types';
+import * as formatters from '../../../utils/formatters';
 
 // Mock the product service
 jest.mock('../../../services/productService');
 const mockedProductService = productService as jest.Mocked<typeof productService>;
+
+// Mock the formatters module
+jest.mock('../../../utils/formatters', () => {
+  const originalModule = jest.requireActual('../../../utils/formatters');
+  return {
+    ...originalModule,
+    sortProducts: jest.fn((products, sortOption) => {
+      // Return a copy of the products array to simulate sorting
+      return [...products];
+    }),
+    formatPrice: originalModule.formatPrice,
+    formatPercentage: originalModule.formatPercentage
+  };
+});
+const mockedSortProducts = formatters.sortProducts as jest.Mock;
 
 // Mock the components that are not relevant for this test
 jest.mock('../components/ProductGrid', () => ({
@@ -240,5 +257,132 @@ describe('ProductCatalogManager Component', () => {
     expect(screen.getByRole('alert')).toBeInTheDocument();
     expect(screen.getByText('Error!')).toBeInTheDocument();
     expect(screen.getByText(errorMessage)).toBeInTheDocument();
+  });
+
+  test('should perform client-side sorting when sort option changes', async () => {
+    // Mock the API response
+    mockedProductService.getProducts.mockResolvedValueOnce({
+      success: true,
+      statusCode: 200,
+      data: mockProducts,
+      message: 'Products retrieved successfully'
+    });
+
+    // Render the component
+    render(
+      <Provider store={store}>
+        <BrowserRouter>
+          <ProductCatalogManager />
+        </BrowserRouter>
+      </Provider>
+    );
+
+    // Wait for the products to load
+    await waitFor(() => {
+      expect(screen.queryByTestId('spinner')).not.toBeInTheDocument();
+    });
+
+    // Reset the mock to verify no additional API calls are made when sorting
+    mockedProductService.getProducts.mockClear();
+
+    // Dispatch a sort option change to trigger client-side sorting
+    store.dispatch(setSortOption(SortOption.PRICE_LOW_TO_HIGH));
+
+    // Verify that sortProducts was called with the correct parameters
+    expect(mockedSortProducts).toHaveBeenCalledWith(expect.any(Array), SortOption.PRICE_LOW_TO_HIGH);
+
+    // Verify that no additional API calls were made for sorting
+    expect(mockedProductService.getProducts).not.toHaveBeenCalled();
+  });
+
+  test('should maintain client-side sorting when pagination changes', async () => {
+    // Mock the API response with pagination metadata
+    mockedProductService.getProducts.mockResolvedValueOnce({
+      success: true,
+      statusCode: 200,
+      data: mockProducts,
+      meta: {
+        total: 10,
+        totalPages: 5,
+        currentPage: 1,
+        itemsPerPage: 2,
+        hasNextPage: true,
+        hasPrevPage: false
+      },
+      message: 'Products retrieved successfully'
+    });
+
+    // Render the component
+    render(
+      <Provider store={store}>
+        <BrowserRouter>
+          <ProductCatalogManager />
+        </BrowserRouter>
+      </Provider>
+    );
+
+    // Wait for the products to load
+    await waitFor(() => {
+      expect(screen.queryByTestId('spinner')).not.toBeInTheDocument();
+    });
+
+    // Set a sort option
+    store.dispatch(setSortOption(SortOption.PRICE_HIGH_TO_LOW));
+    
+    // Clear the mocks to track new calls
+    mockedSortProducts.mockClear();
+    mockedProductService.getProducts.mockClear();
+    
+    // Mock the API response for the next page
+    mockedProductService.getProducts.mockResolvedValueOnce({
+      success: true,
+      statusCode: 200,
+      data: [
+        {
+          id: '3',
+          name: 'Test Product 3',
+          description: 'This is test product 3',
+          price: 199.99,
+          images: ['image3.jpg'],
+          mainImage: 'main-image3.jpg',
+          categoryId: 'cat1',
+          category: 'Electronics',
+          rating: 4.0,
+          ratingCount: 90,
+          stock: 8,
+          sku: 'TEST-SKU-789',
+          brand: 'Test Brand',
+          featured: true,
+          onSale: false,
+          tags: ['electronics'],
+          createdAt: '2023-03-01',
+          updatedAt: '2023-03-10'
+        }
+      ],
+      meta: {
+        total: 10,
+        totalPages: 5,
+        currentPage: 2,
+        itemsPerPage: 2,
+        hasNextPage: true,
+        hasPrevPage: true
+      },
+      message: 'Products retrieved successfully'
+    });
+
+    // Change the page
+    store.dispatch(setCurrentPage(2));
+
+    // Wait for the new page to load
+    await waitFor(() => {
+      // Verify that the API was called for the new page
+      expect(mockedProductService.getProducts).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ page: 2 })
+      );
+    });
+
+    // Verify that client-side sorting is still applied after pagination
+    expect(mockedSortProducts).toHaveBeenCalledWith(expect.any(Array), SortOption.PRICE_HIGH_TO_LOW);
   });
 });
