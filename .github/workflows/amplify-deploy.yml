@@ -9,48 +9,65 @@ jobs:
   deploy:
     name: Deploy to AWS Amplify
     runs-on: ubuntu-latest
+    env:
+      REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
+      AMPLIFY_APP_ID: ${{ secrets.AMPLIFY_APP_ID }}
+      AMPLIFY_BRANCH_NAME: main
     
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
         
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-          cache: 'npm'
-          
-      - name: Install dependencies
-        run: npm ci
-        
-      - name: Build application
-        env:
-          REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
-        run: npm run build
-        
-      # Using the pre-installed AWS CLI in GitHub Actions runner
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
-          
-      # Verify the pre-installed AWS CLI version
-      - name: Verify AWS CLI
-        run: aws --version
-          
-      - name: Deploy to AWS Amplify
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+      
+      - name: Set environment variable in Amplify
         run: |
-          echo "Starting deployment to AWS Amplify..."
-          # Create a deployment ZIP file
-          zip -r build.zip build/
+          echo "Setting environment variables in AWS Amplify..."
+          aws amplify update-app --app-id "$AMPLIFY_APP_ID" \
+            --environment-variables REACT_APP_API_URL="$REACT_APP_API_URL"
+  
+      - name: Deploy to AWS Amplify
+        id: deploy
+        run: |
+          echo "Starting Amplify deployment..."
           
-          # Start the deployment job using pre-installed AWS CLI
-          aws amplify start-deployment \
-            --app-id ${{ secrets.AMPLIFY_APP_ID }} \
-            --branch-name production \
-            --source-url fileb://$(pwd)/build.zip
-          
-          echo "Deployment initiated successfully"
-        # AWS credentials are already configured by the aws-actions/configure-aws-credentials step
+          # Pass the environment variable in JSON format
+          ENV_VARS=$(jq -n --arg apiUrl "$REACT_APP_API_URL" '{"REACT_APP_API_URL": $apiUrl}')
+
+          DEPLOYMENT_ID=$(aws amplify start-job \
+            --app-id "$AMPLIFY_APP_ID" \
+            --branch-name "$AMPLIFY_BRANCH_NAME" \
+            --job-type RELEASE \
+            --query 'jobSummary.jobId' \
+            --output text)
+
+          echo "deployment_id=$DEPLOYMENT_ID" >> $GITHUB_ENV
+          echo "Started deployment with ID: $DEPLOYMENT_ID"
+
+          # Poll for deployment status
+          while true; do
+            JOB_STATUS=$(aws amplify get-job \
+              --app-id "$AMPLIFY_APP_ID" \
+              --branch-name "$AMPLIFY_BRANCH_NAME" \
+              --job-id "$DEPLOYMENT_ID" \
+              --query 'job.summary.status' \
+              --output text)
+
+            echo "Current status: $JOB_STATUS"
+            
+            if [[ "$JOB_STATUS" == "SUCCEED" ]]; then
+              echo "Deployment succeeded!"
+              exit 0
+            elif [[ "$JOB_STATUS" == "FAILED" ]]; then
+              echo "Deployment failed!"
+              exit 1
+            fi
+            
+            sleep 10
+          done
