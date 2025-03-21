@@ -139,14 +139,6 @@ const ProductList: React.FC<ProductListProps> = ({
             ? product.price * (1 - product.discountPercentage / 100)
             : null;
 
-        // Handle fakestoreapi.com structure
-        const productName = product.name || product.title;
-        const productImage = product.mainImage || product.image;
-        const productCategory = product.category;
-        const productRating = product.rating?.rate || product.rating || 0;
-        const productRatingCount = product.rating?.count || product.ratingCount || 0;
-        const productDescription = product.description;
-
         return (
           <Card 
             key={product.id}
@@ -158,8 +150,8 @@ const ProductList: React.FC<ProductListProps> = ({
               {/* Product image */}
               <div className="relative w-full md:w-48 h-48 flex-shrink-0">
                 <img 
-                  src={productImage} 
-                  alt={productName}
+                  src={product.mainImage} 
+                  alt={product.name}
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     (e.target as HTMLImageElement).src = 'https://via.placeholder.com/300x300?text=No+Image';
@@ -184,14 +176,14 @@ const ProductList: React.FC<ProductListProps> = ({
               {/* Product details */}
               <div className="flex-grow p-4 flex flex-col">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm text-gray-500">{product.brand || productCategory}</span>
-                  {renderRating(productRating)}
+                  <span className="text-sm text-gray-500">{product.brand}</span>
+                  {renderRating(product.rating)}
                 </div>
                 
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">{productName}</h3>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">{product.name}</h3>
                 
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
-                  {productDescription}
+                  {product.description}
                 </p>
                 
                 {/* Price display with proper type checking using formatPrice utility */}
