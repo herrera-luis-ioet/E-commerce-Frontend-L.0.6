@@ -29,7 +29,7 @@ const ProductGallery: React.FC<ProductGalleryProps> = ({
   // Combine all product images into a single array, with main image first
   const allImages = [
     product.mainImage,
-    ...product.images.filter(img => img !== product.mainImage)
+    ...(product.images?.filter(img => img !== product.mainImage) || [])
   ];
 
   // Handle mouse move for zoom effect
