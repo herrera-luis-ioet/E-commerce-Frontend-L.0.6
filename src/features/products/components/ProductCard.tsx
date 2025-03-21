@@ -75,6 +75,14 @@ const ProductCard: React.FC<ProductCardProps> = ({
     ? product.price * (1 - product.discountPercentage / 100)
     : null;
 
+  // Handle fakestoreapi.com structure
+  const productName = product.name || product.title;
+  const productImage = product.mainImage || product.image;
+  const productCategory = product.category;
+  const productRating = product.rating?.rate || product.rating || 0;
+  const productRatingCount = product.rating?.count || product.ratingCount || 0;
+  
+
 
   // Render star rating
   const renderRating = (rating: number, ratingCount: number) => {
@@ -166,8 +174,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
       {/* Product image with badges */}
       <div className="relative mb-4 h-48 overflow-hidden rounded-md">
         <img 
-          src={product.mainImage} 
-          alt={product.name}
+          src={productImage} 
+          alt={productName}
           className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
           onError={(e) => {
             (e.target as HTMLImageElement).src = 'https://via.placeholder.com/300x300?text=No+Image';
@@ -180,11 +188,11 @@ const ProductCard: React.FC<ProductCardProps> = ({
       {/* Product info */}
       <div className="flex-grow">
         <div className="flex items-center justify-between mb-1">
-          <span className="text-xs text-gray-500">{product.brand}</span>
-          {renderRating(product.rating, product.ratingCount)}
+          <span className="text-xs text-gray-500">{product.brand || productCategory}</span>
+          {renderRating(productRating, productRatingCount)}
         </div>
         
-        <h3 className="font-medium text-gray-900 dark:text-white mb-1 line-clamp-2">{product.name}</h3>
+        <h3 className="font-medium text-gray-900 dark:text-white mb-1 line-clamp-2">{productName}</h3>
         
         <div className="flex items-center space-x-2">
           {discountedPrice ? (

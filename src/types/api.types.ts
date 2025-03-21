@@ -87,23 +87,23 @@ export interface ApiError {
  */
 export enum Endpoints {
   /** Base API URL */
-  BASE = '/api/v1',
+  BASE = '',
   /** Products endpoint */
-  PRODUCTS = '/api/v1/products',
+  PRODUCTS = '/products',
   /** Categories endpoint */
-  CATEGORIES = '/api/v1/categories',
+  CATEGORIES = '/products/categories',
   /** Product by ID endpoint (append product ID) */
-  PRODUCT_BY_ID = '/api/v1/products/',
+  PRODUCT_BY_ID = '/products/',
   /** Category by ID endpoint (append category ID) */
-  CATEGORY_BY_ID = '/api/v1/categories/',
+  CATEGORY_BY_ID = '/products/category/',
   /** Featured products endpoint */
-  FEATURED_PRODUCTS = '/api/v1/products/featured',
+  FEATURED_PRODUCTS = '/products?limit=5',
   /** Products on sale endpoint */
-  SALE_PRODUCTS = '/api/v1/products/sale',
+  SALE_PRODUCTS = '/products?sort=desc',
   /** Search products endpoint */
-  SEARCH_PRODUCTS = '/api/v1/products/search',
+  SEARCH_PRODUCTS = '/products',
   /** Product reviews endpoint (append product ID) */
-  PRODUCT_REVIEWS = '/api/v1/products/reviews/',
+  PRODUCT_REVIEWS = '/products/',
 }
 
 /**
