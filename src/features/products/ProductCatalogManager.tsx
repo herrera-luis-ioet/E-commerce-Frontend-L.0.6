@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAppDispatch } from '../../store/hooks';
 import {
   useProductCatalog,
@@ -7,7 +6,7 @@ import {
 } from '../../store/hooks';
 import { fetchProducts } from '../../store/slices/productSlice';
 import { setViewMode, setCurrentPage } from '../../store/slices/filterSlice';
-import { ProductView, Product } from '../../types/product.types';
+import { ProductView } from '../../types/product.types';
 import { sortProducts } from '../../utils/formatters';
 
 // Components
@@ -35,7 +34,6 @@ import Spinner from '../../components/ui/Spinner';
  */
 const ProductCatalogManager: React.FC = () => {
   const dispatch = useAppDispatch();
-  const navigate = useNavigate();
   
   // Get product catalog data from Redux store
   const {
@@ -74,11 +72,6 @@ const ProductCatalogManager: React.FC = () => {
   const handlePageChange = useCallback((page: number) => {
     dispatch(setCurrentPage(page));
   }, [dispatch]);
-  
-  // Handle view details action
-  const onViewDetails = useCallback((product: Product) => {
-    navigate(`/products/${product.id}`);
-  }, [navigate]);
 
   // Toggle mobile filters visibility
   const toggleMobileFilters = useCallback(() => {
@@ -87,17 +80,17 @@ const ProductCatalogManager: React.FC = () => {
 
   // Apply client-side sorting to products
   const sortedProducts = useMemo(() => {
-    return sortProducts([...(products || [])], sortOption);
+    return sortProducts([...products], sortOption);
   }, [products, sortOption]);
 
   // Calculate safe values for totalProducts and totalPages to handle cases where they might be undefined
   const safeTotalProducts = useMemo(() => {
-    return typeof totalProducts === 'number' ? totalProducts : (sortedProducts ? sortedProducts.length : 0);
-  }, [totalProducts, sortedProducts]);
+    return typeof totalProducts === 'number' ? totalProducts : sortedProducts.length;
+  }, [totalProducts, sortedProducts.length]);
 
   const safeTotalPages = useMemo(() => {
-    return typeof totalPages === 'number' ? totalPages : Math.max(1, Math.ceil((sortedProducts ? sortedProducts.length : 0) / itemsPerPage));
-  }, [totalPages, sortedProducts, itemsPerPage]);
+    return typeof totalPages === 'number' ? totalPages : Math.max(1, Math.ceil(sortedProducts.length / itemsPerPage));
+  }, [totalPages, sortedProducts.length, itemsPerPage]);
 
   // Memoize the product display component to prevent unnecessary re-renders
   const ProductDisplay = useMemo(() => {
@@ -118,7 +111,7 @@ const ProductCatalogManager: React.FC = () => {
       );
     }
 
-    if (!sortedProducts || sortedProducts.length === 0) {
+    if (sortedProducts.length === 0) {
       return (
         <div className="text-center py-10">
           <h3 className="text-lg font-medium text-gray-900">No products found</h3>
@@ -130,22 +123,11 @@ const ProductCatalogManager: React.FC = () => {
     }
 
     return viewMode === 'grid' ? (
-      <ProductGrid 
-        products={sortedProducts} 
-        isLoading={loading} 
-        error={error || undefined} 
-        onViewDetails={onViewDetails}
-      />
+      <ProductGrid products={sortedProducts} isLoading={loading} error={error || undefined} />
     ) : (
-      <ProductList 
-        products={sortedProducts} 
-        isLoading={loading} 
-        error={error || undefined} 
-        showActions={true} 
-        onViewDetails={onViewDetails}
-      />
+      <ProductList products={sortedProducts} isLoading={loading} error={error || undefined} showActions={true} />
     );
-  }, [sortedProducts, loading, error, viewMode, onViewDetails]);
+  }, [sortedProducts, loading, error, viewMode]);
 
   return (
     <div className="bg-white">
