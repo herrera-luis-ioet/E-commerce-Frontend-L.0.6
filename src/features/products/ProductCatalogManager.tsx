@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAppDispatch } from '../../store/hooks';
 import {
   useProductCatalog,
@@ -6,7 +7,7 @@ import {
 } from '../../store/hooks';
 import { fetchProducts } from '../../store/slices/productSlice';
 import { setViewMode, setCurrentPage } from '../../store/slices/filterSlice';
-import { ProductView } from '../../types/product.types';
+import { ProductView, Product } from '../../types/product.types';
 import { sortProducts } from '../../utils/formatters';
 
 // Components
@@ -34,6 +35,7 @@ import Spinner from '../../components/ui/Spinner';
  */
 const ProductCatalogManager: React.FC = () => {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   
   // Get product catalog data from Redux store
   const {
@@ -72,6 +74,11 @@ const ProductCatalogManager: React.FC = () => {
   const handlePageChange = useCallback((page: number) => {
     dispatch(setCurrentPage(page));
   }, [dispatch]);
+  
+  // Handle view details action
+  const handleViewDetails = useCallback((product: Product) => {
+    navigate(`/products/${product.id}`);
+  }, [navigate]);
 
   // Toggle mobile filters visibility
   const toggleMobileFilters = useCallback(() => {
@@ -123,11 +130,22 @@ const ProductCatalogManager: React.FC = () => {
     }
 
     return viewMode === 'grid' ? (
-      <ProductGrid products={sortedProducts} isLoading={loading} error={error || undefined} />
+      <ProductGrid 
+        products={sortedProducts} 
+        isLoading={loading} 
+        error={error || undefined} 
+        onViewDetails={handleViewDetails}
+      />
     ) : (
-      <ProductList products={sortedProducts} isLoading={loading} error={error || undefined} showActions={true} />
+      <ProductList 
+        products={sortedProducts} 
+        isLoading={loading} 
+        error={error || undefined} 
+        showActions={true} 
+        onViewDetails={handleViewDetails}
+      />
     );
-  }, [sortedProducts, loading, error, viewMode]);
+  }, [sortedProducts, loading, error, viewMode, handleViewDetails]);
 
   return (
     <div className="bg-white">
