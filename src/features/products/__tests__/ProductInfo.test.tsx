@@ -180,4 +180,33 @@ describe('ProductInfo Component', () => {
     const discountedPrice = mockProduct.price * (1 - mockProduct.discountPercentage! / 100);
     expect(screen.getByText(formatPrice(discountedPrice))).toBeInTheDocument();
   });
+
+  test('safely handles product with non-array tags', () => {
+    // Create a product with tags as undefined or non-array
+    const productWithInvalidTags = {
+      ...mockProduct,
+      // @ts-ignore - Intentionally setting tags to a non-array type to test the fix
+      tags: 'not-an-array'
+    };
+    
+    // This should not throw an error with our fix
+    render(<ProductInfo product={productWithInvalidTags} />);
+    
+    // The tags section should not be rendered
+    expect(screen.queryByText('Tags')).not.toBeInTheDocument();
+  });
+
+  test('safely handles product with undefined tags', () => {
+    // Create a product with undefined tags
+    const productWithUndefinedTags = {
+      ...mockProduct,
+      tags: undefined as unknown as string[]
+    };
+    
+    // This should not throw an error with our fix
+    render(<ProductInfo product={productWithUndefinedTags} />);
+    
+    // The tags section should not be rendered
+    expect(screen.queryByText('Tags')).not.toBeInTheDocument();
+  });
 });

@@ -196,7 +196,7 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
             </ul>
           </div>
           
-          {product.tags && product.tags.length > 0 && (
+          {Array.isArray(product.tags) && product.tags.length > 0 && (
             <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
               <h3 className="font-medium text-gray-900 dark:text-white mb-2">Tags</h3>
               <div className="flex flex-wrap gap-2">
