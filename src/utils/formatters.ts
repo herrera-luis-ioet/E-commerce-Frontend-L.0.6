@@ -6,6 +6,83 @@ import { Product } from '../types/product.types';
 import { SortOption } from '../types/product.types';
 
 /**
+ * Options for date formatting
+ */
+export interface FormatDateOptions {
+  /** Date format style (default: 'medium') */
+  dateStyle?: 'full' | 'long' | 'medium' | 'short';
+  /** Time format style (default: undefined - no time display) */
+  timeStyle?: 'full' | 'long' | 'medium' | 'short';
+  /** Locale for formatting (default: 'en-US') */
+  locale?: string;
+  /** Value to return for invalid dates (default: 'Invalid Date') */
+  fallbackValue?: string;
+}
+
+/**
+ * PUBLIC_INTERFACE
+ * Formats a date string into a localized date format
+ * 
+ * This function safely handles ISO date strings and converts them to a localized format.
+ * It handles invalid dates gracefully and provides customization options.
+ * 
+ * @param dateString - The date string to format (e.g., '2025-03-21T17:28:12')
+ * @param options - Formatting options
+ * @returns Formatted date string
+ * 
+ * @example
+ * // Returns "Mar 21, 2025"
+ * formatDate('2025-03-21T17:28:12');
+ * 
+ * @example
+ * // Returns "March 21, 2025, 5:28:12 PM"
+ * formatDate('2025-03-21T17:28:12', { dateStyle: 'long', timeStyle: 'medium' });
+ * 
+ * @example
+ * // Returns "N/A" for invalid input
+ * formatDate('invalid-date', { fallbackValue: 'N/A' });
+ */
+export const formatDate = (
+  dateString: string,
+  options: FormatDateOptions = {}
+): string => {
+  // Default options
+  const {
+    dateStyle = 'medium',
+    timeStyle,
+    locale = 'en-US',
+    fallbackValue = 'Invalid Date'
+  } = options;
+
+  // Handle empty or invalid input
+  if (!dateString) {
+    return fallbackValue;
+  }
+
+  try {
+    // Create a Date object from the input string
+    const date = new Date(dateString);
+    
+    // Check if the date is valid
+    if (isNaN(date.getTime())) {
+      return fallbackValue;
+    }
+
+    // Format options for Intl.DateTimeFormat
+    const formatOptions: Intl.DateTimeFormatOptions = {
+      dateStyle,
+      ...(timeStyle && { timeStyle })
+    };
+
+    // Format the date using Intl.DateTimeFormat
+    return new Intl.DateTimeFormat(locale, formatOptions).format(date);
+  } catch (error) {
+    console.error('Error formatting date:', error);
+    return fallbackValue;
+  }
+};
+
+/**
  * Options for price formatting
  */
 export interface FormatPriceOptions {

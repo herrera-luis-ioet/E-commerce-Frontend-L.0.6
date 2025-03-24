@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Product } from '../../../types/product.types';
 import Button from '../../../components/ui/Button';
-import { formatPrice } from '../../../utils/formatters';
+import { formatPrice, formatDate } from '../../../utils/formatters';
 
 /**
  * ProductInfo component props
@@ -266,10 +266,10 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
       <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
         <div className="text-sm text-gray-600 dark:text-gray-400">
           <p className="mb-1">
-            <span className="font-medium">Created:</span> {new Date(product.createdAt).toLocaleDateString()}
+            <span className="font-medium">Created:</span> {formatDate(product.createdAt)}
           </p>
           <p>
-            <span className="font-medium">Last Updated:</span> {new Date(product.updatedAt).toLocaleDateString()}
+            <span className="font-medium">Last Updated:</span> {formatDate(product.updatedAt)}
           </p>
         </div>
       </div>

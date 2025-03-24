@@ -1,4 +1,4 @@
-import { formatPrice, formatPercentage, sortProducts } from '../formatters';
+import { formatPrice, formatPercentage, formatDate, sortProducts } from '../formatters';
 import { Product, SortOption } from '../../types/product.types';
 
 describe('formatters', () => {
@@ -96,6 +96,87 @@ describe('formatters', () => {
 
     it('handles non-numeric string input', () => {
       expect(formatPercentage('abc')).toBe('0%');
+    });
+  });
+
+  describe('formatDate', () => {
+    // Mock the Intl.DateTimeFormat to ensure consistent test results
+    const originalDateTimeFormat = Intl.DateTimeFormat;
+    
+    beforeEach(() => {
+      // Mock implementation for consistent test results
+      global.Intl.DateTimeFormat = jest.fn().mockImplementation((locale, options) => {
+        return {
+          format: (date) => {
+            if (options.dateStyle === 'medium' && !options.timeStyle) {
+              return 'Mar 21, 2025';
+            } else if (options.dateStyle === 'long' && options.timeStyle === 'medium') {
+              return 'March 21, 2025, 5:28:12 PM';
+            } else if (options.dateStyle === 'short') {
+              return '3/21/25';
+            } else if (options.dateStyle === 'full') {
+              return 'Friday, March 21, 2025';
+            }
+            return 'Mar 21, 2025'; // Default fallback
+          }
+        };
+      });
+    });
+    
+    afterEach(() => {
+      // Restore original implementation
+      global.Intl.DateTimeFormat = originalDateTimeFormat;
+    });
+
+    it('formats an ISO date string with default options', () => {
+      expect(formatDate('2025-03-21T17:28:12')).toBe('Mar 21, 2025');
+    });
+
+    it('specifically handles the ISO date format 2025-03-21T17:28:12', () => {
+      // This test specifically verifies the format mentioned in the issue
+      expect(formatDate('2025-03-21T17:28:12')).toBe('Mar 21, 2025');
+      
+      // Also verify with different formatting options
+      expect(formatDate('2025-03-21T17:28:12', { dateStyle: 'short' })).toBe('3/21/25');
+      expect(formatDate('2025-03-21T17:28:12', { dateStyle: 'long', timeStyle: 'medium' })).toBe('March 21, 2025, 5:28:12 PM');
+    });
+
+    it('formats an ISO date string with time', () => {
+      expect(formatDate('2025-03-21T17:28:12', { dateStyle: 'long', timeStyle: 'medium' })).toBe('March 21, 2025, 5:28:12 PM');
+    });
+
+    it('formats an ISO date string with short date style', () => {
+      expect(formatDate('2025-03-21T17:28:12', { dateStyle: 'short' })).toBe('3/21/25');
+    });
+
+    it('formats an ISO date string with full date style', () => {
+      expect(formatDate('2025-03-21T17:28:12', { dateStyle: 'full' })).toBe('Friday, March 21, 2025');
+    });
+
+    it('handles empty input', () => {
+      expect(formatDate('')).toBe('Invalid Date');
+    });
+
+    it('handles null input', () => {
+      expect(formatDate(null as unknown as string)).toBe('Invalid Date');
+    });
+
+    it('handles undefined input', () => {
+      expect(formatDate(undefined as unknown as string)).toBe('Invalid Date');
+    });
+
+    it('handles invalid date string', () => {
+      expect(formatDate('not-a-date')).toBe('Invalid Date');
+    });
+
+    it('handles custom fallback value', () => {
+      expect(formatDate('', { fallbackValue: 'N/A' })).toBe('N/A');
+      expect(formatDate('invalid-date', { fallbackValue: 'No Date Available' })).toBe('No Date Available');
+    });
+
+    it('handles different locales', () => {
+      // This test relies on the mock implementation
+      expect(formatDate('2025-03-21T17:28:12', { locale: 'fr-FR' })).toBe('Mar 21, 2025');
     });
   });
 
