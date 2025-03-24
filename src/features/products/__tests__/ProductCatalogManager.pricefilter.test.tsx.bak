@@ -67,7 +67,7 @@ describe('ProductCatalogManager with client-side price filter', () => {
   beforeEach(() => {
     // Initial state with no price filters
     store = mockStore({
-      products: {
+      product: {
         products: mockProducts,
         loading: false,
         error: null,
@@ -110,7 +110,7 @@ describe('ProductCatalogManager with client-side price filter', () => {
   it('filters products with min price only', () => {
     // Update store with min price filter
     store = mockStore({
-      products: {
+      product: {
         products: mockProducts,
         loading: false,
         error: null,
@@ -121,7 +121,7 @@ describe('ProductCatalogManager with client-side price filter', () => {
       },
       filter: {
         filters: {
-          minPrice: 499
+          minPrice: 500
         },
         sortOption: 'newest',
         viewMode: 'grid',
@@ -153,7 +153,7 @@ describe('ProductCatalogManager with client-side price filter', () => {
   it('filters products with max price only', () => {
     // Update store with max price filter
     store = mockStore({
-      products: {
+      product: {
         products: mockProducts,
         loading: false,
         error: null,
@@ -196,7 +196,7 @@ describe('ProductCatalogManager with client-side price filter', () => {
   it('filters products with both min and max price', () => {
     // Update store with min and max price filters
     store = mockStore({
-      products: {
+      product: {
         products: mockProducts,
         loading: false,
         error: null,
@@ -240,7 +240,7 @@ describe('ProductCatalogManager with client-side price filter', () => {
   it('shows no products message when no products match the price filter', () => {
     // Update store with price filter that matches no products
     store = mockStore({
-      products: {
+      product: {
         products: mockProducts,
         loading: false,
         error: null,
@@ -288,7 +288,7 @@ describe('ProductCatalogManager with client-side price filter', () => {
   it('shows loading state when products are loading', () => {
     // Update store to show loading state
     store = mockStore({
-      products: {
+      product: {
         products: [],
         loading: true,
         error: null,
@@ -326,7 +326,7 @@ describe('ProductCatalogManager with client-side price filter', () => {
   it('shows error state when there is an error', () => {
     // Update store to show error state
     store = mockStore({
-      products: {
+      product: {
         products: [],
         loading: false,
         error: 'Failed to fetch products',
