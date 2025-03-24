@@ -166,15 +166,24 @@ describe("ProductCatalogManager API Call Tests", () => {
 
     // Verify that the API was called once during initial load
     expect(mockedProductService.getProducts).toHaveBeenCalledTimes(1);
+    
+    // Verify that the initial API call doesn't include price range filters
+    expect(mockedProductService.getProducts).toHaveBeenCalledWith(
+      expect.objectContaining({
+        // Expect any filter object that doesn't have minPrice or maxPrice
+        filter: expect.not.objectContaining({
+          minPrice: expect.anything(),
+          maxPrice: expect.anything()
+        })
+      }),
+      expect.anything()
+    );
 
     // Reset the mock to verify no additional API calls are made when price filters change
     mockedProductService.getProducts.mockClear();
 
     // Wait a bit to ensure any potential API calls would have been triggered
     await new Promise(resolve => setTimeout(resolve, 100));
-    
-    // Reset the mock to verify no additional API calls are made when price filters change
-    mockedProductService.getProducts.mockClear();
     
     // Dispatch a price filter change (minPrice)
     await act(async () => {
@@ -239,5 +248,15 @@ describe("ProductCatalogManager API Call Tests", () => {
 
     // Verify that an API call was made after changing a non-price filter
     expect(mockedProductService.getProducts).toHaveBeenCalledTimes(1);
+    
+    // Verify that the API call includes the brand filter but not price filters
+    expect(mockedProductService.getProducts).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filter: expect.objectContaining({
+          brand: "Test Brand"
+        })
+      }),
+      expect.anything()
+    );
   });
 });
