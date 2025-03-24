@@ -8,7 +8,7 @@ import {
 import { fetchProducts } from '../../store/slices/productSlice';
 import { setViewMode, setCurrentPage } from '../../store/slices/filterSlice';
 import { ProductView, Product } from '../../types/product.types';
-import { sortProducts } from '../../utils/formatters';
+import { sortProducts, applyClientSideFilters } from '../../utils/formatters';
 
 // Components
 import ProductGrid from './components/ProductGrid';
@@ -85,19 +85,22 @@ const ProductCatalogManager: React.FC = () => {
     setMobileFiltersOpen(prev => !prev);
   }, []);
 
-  // Apply client-side sorting to products
-  const sortedProducts = useMemo(() => {
-    return sortProducts([...products], sortOption);
-  }, [products, sortOption]);
+  // Apply client-side filtering and sorting to products
+  const filteredAndSortedProducts = useMemo(() => {
+    // First apply client-side filters (price range)
+    const filteredProducts = applyClientSideFilters([...products], filters);
+    // Then apply sorting
+    return sortProducts(filteredProducts, sortOption);
+  }, [products, filters, sortOption]);
 
   // Calculate safe values for totalProducts and totalPages to handle cases where they might be undefined
   const safeTotalProducts = useMemo(() => {
-    return typeof totalProducts === 'number' ? totalProducts : sortedProducts.length;
-  }, [totalProducts, sortedProducts.length]);
+    return filteredAndSortedProducts.length;
+  }, [filteredAndSortedProducts.length]);
 
   const safeTotalPages = useMemo(() => {
-    return typeof totalPages === 'number' ? totalPages : Math.max(1, Math.ceil(sortedProducts.length / itemsPerPage));
-  }, [totalPages, sortedProducts.length, itemsPerPage]);
+    return Math.max(1, Math.ceil(filteredAndSortedProducts.length / itemsPerPage));
+  }, [filteredAndSortedProducts.length, itemsPerPage]);
 
   // Memoize the product display component to prevent unnecessary re-renders
   const ProductDisplay = useMemo(() => {
@@ -118,7 +121,7 @@ const ProductCatalogManager: React.FC = () => {
       );
     }
 
-    if (sortedProducts.length === 0) {
+    if (filteredAndSortedProducts.length === 0) {
       return (
         <div className="text-center py-10">
           <h3 className="text-lg font-medium text-gray-900">No products found</h3>
@@ -131,21 +134,21 @@ const ProductCatalogManager: React.FC = () => {
 
     return viewMode === 'grid' ? (
       <ProductGrid 
-        products={sortedProducts} 
+        products={filteredAndSortedProducts} 
         isLoading={loading} 
         error={error || undefined} 
         onViewDetails={handleViewDetails}
       />
     ) : (
       <ProductList 
-        products={sortedProducts} 
+        products={filteredAndSortedProducts} 
         isLoading={loading} 
         error={error || undefined} 
         showActions={true} 
         onViewDetails={handleViewDetails}
       />
     );
-  }, [sortedProducts, loading, error, viewMode, handleViewDetails]);
+  }, [filteredAndSortedProducts, loading, error, viewMode, handleViewDetails]);
 
   return (
     <div className="bg-white">

@@ -3,7 +3,7 @@
  */
 
 import { Product } from '../types/product.types';
-import { SortOption } from '../types/product.types';
+import { ProductFilter, SortOption } from '../types/product.types';
 
 /**
  * Options for price formatting
@@ -245,4 +245,84 @@ export const sortProducts = (
       // Return unsorted array if sort option is not recognized
       return sortedProducts;
   }
+};
+
+/**
+ * PUBLIC_INTERFACE
+ * Filters an array of products based on price range
+ * 
+ * This function takes an array of products and optional min/max price values,
+ * and returns a new array containing only products that fall within the specified price range.
+ * 
+ * @param products - Array of products to filter
+ * @param minPrice - Minimum price (inclusive, optional)
+ * @param maxPrice - Maximum price (inclusive, optional)
+ * @returns New filtered array of products
+ * 
+ * @example
+ * // Returns products with price >= 10 and <= 50
+ * filterProductsByPrice(products, 10, 50);
+ * 
+ * @example
+ * // Returns products with price >= 10
+ * filterProductsByPrice(products, 10);
+ * 
+ * @example
+ * // Returns products with price <= 50
+ * filterProductsByPrice(products, undefined, 50);
+ */
+export const filterProductsByPrice = (
+  products: Product[],
+  minPrice?: number,
+  maxPrice?: number
+): Product[] => {
+  // If no price filters are applied, return all products
+  if (minPrice === undefined && maxPrice === undefined) {
+    return products;
+  }
+  
+  // Create a copy of the array to avoid mutating the original
+  return products.filter(product => {
+    const price = product.price;
+    
+    // If price is undefined or null, exclude the product
+    if (price === undefined || price === null) {
+      return false;
+    }
+    
+    // Check if price is within the specified range
+    const isAboveMin = minPrice === undefined || price >= minPrice;
+    const isBelowMax = maxPrice === undefined || price <= maxPrice;
+    
+    return isAboveMin && isBelowMax;
+  });
+};
+
+/**
+ * PUBLIC_INTERFACE
+ * Applies all client-side filters to an array of products
+ * 
+ * This function takes an array of products and a filter object,
+ * and returns a new array with all applicable client-side filters applied.
+ * 
+ * @param products - Array of products to filter
+ * @param filters - Filter criteria to apply
+ * @returns New filtered array of products
+ */
+export const applyClientSideFilters = (
+  products: Product[],
+  filters: ProductFilter
+): Product[] => {
+  let filteredProducts = [...products];
+  
+  // Apply price range filter
+  filteredProducts = filterProductsByPrice(
+    filteredProducts,
+    filters.minPrice,
+    filters.maxPrice
+  );
+  
+  // Additional client-side filters can be added here in the future
+  
+  return filteredProducts;
 };

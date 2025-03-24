@@ -23,6 +23,10 @@ interface PriceRangeFilterProps {
  * 
  * This component renders min and max price inputs and updates
  * the Redux store when the price range changes.
+ * 
+ * Note: This component now uses client-side filtering instead of server-side filtering.
+ * The price range values are still stored in the Redux store, but the filtering is applied
+ * locally to the products that have already been fetched from the server.
  */
 const PriceRangeFilter: React.FC<PriceRangeFilterProps> = ({
   label = 'Price Range',
@@ -56,13 +60,13 @@ const PriceRangeFilter: React.FC<PriceRangeFilterProps> = ({
     };
   };
   
-  // Update min price in Redux store
+  // Update min price in Redux store for client-side filtering
   const updateMinPrice = debounce((value: string) => {
     const numValue = value === '' ? undefined : parseFloat(value);
     dispatch(updateFilter({ key: 'minPrice', value: numValue }));
   }, debounceDelay);
   
-  // Update max price in Redux store
+  // Update max price in Redux store for client-side filtering
   const updateMaxPrice = debounce((value: string) => {
     const numValue = value === '' ? undefined : parseFloat(value);
     dispatch(updateFilter({ key: 'maxPrice', value: numValue }));
