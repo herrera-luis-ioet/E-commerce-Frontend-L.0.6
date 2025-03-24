@@ -1,5 +1,5 @@
-import { formatPrice, formatPercentage, sortProducts } from '../formatters';
-import { Product, SortOption } from '../../types/product.types';
+import { formatPrice, formatPercentage, sortProducts, filterProductsByPrice, applyClientSideFilters } from '../formatters';
+import { Product, SortOption, ProductFilter } from '../../types/product.types';
 
 describe('formatters', () => {
   describe('formatPrice', () => {
@@ -382,6 +382,234 @@ describe('formatters', () => {
       
       // Should return array in original order
       expect(sorted).toEqual(original);
+    });
+  });
+
+  describe('filterProductsByPrice', () => {
+    // Mock product data for testing
+    const mockProducts: Product[] = [
+      {
+        id: '1',
+        name: 'Budget Phone',
+        price: 199.99,
+        images: ['image1.jpg'],
+        mainImage: 'image1.jpg',
+        categoryId: 'electronics',
+        category: 'Electronics'
+      },
+      {
+        id: '2',
+        name: 'Mid-range Phone',
+        price: 499.99,
+        images: ['image2.jpg'],
+        mainImage: 'image2.jpg',
+        categoryId: 'electronics',
+        category: 'Electronics'
+      },
+      {
+        id: '3',
+        name: 'Premium Phone',
+        price: 999.99,
+        images: ['image3.jpg'],
+        mainImage: 'image3.jpg',
+        categoryId: 'electronics',
+        category: 'Electronics'
+      },
+      {
+        id: '4',
+        name: 'Luxury Phone',
+        price: 1499.99,
+        images: ['image4.jpg'],
+        mainImage: 'image4.jpg',
+        categoryId: 'electronics',
+        category: 'Electronics'
+      },
+      {
+        id: '5',
+        name: 'Missing Price Phone',
+        price: undefined as any,
+        images: ['image5.jpg'],
+        mainImage: 'image5.jpg',
+        categoryId: 'electronics',
+        category: 'Electronics'
+      }
+    ];
+
+    it('returns all products when no price filters are applied', () => {
+      const filtered = filterProductsByPrice(mockProducts);
+      expect(filtered).toEqual(mockProducts);
+      expect(filtered.length).toBe(5);
+    });
+
+    it('filters products with min price only', () => {
+      const filtered = filterProductsByPrice(mockProducts, 500);
+      expect(filtered.length).toBe(2);
+      expect(filtered.map(p => p.name)).toEqual(['Premium Phone', 'Luxury Phone']);
+      expect(filtered.every(p => p.price && p.price >= 500)).toBe(true);
+    });
+
+    it('filters products with max price only', () => {
+      const filtered = filterProductsByPrice(mockProducts, undefined, 500);
+      expect(filtered.length).toBe(2);
+      expect(filtered.map(p => p.name)).toEqual(['Budget Phone', 'Mid-range Phone']);
+      expect(filtered.every(p => p.price && p.price <= 500)).toBe(true);
+    });
+
+    it('filters products with both min and max price', () => {
+      const filtered = filterProductsByPrice(mockProducts, 400, 1000);
+      expect(filtered.length).toBe(2);
+      expect(filtered.map(p => p.name)).toEqual(['Mid-range Phone', 'Premium Phone']);
+      expect(filtered.every(p => p.price && p.price >= 400 && p.price <= 1000)).toBe(true);
+    });
+
+    it('returns no products when price range has no matches', () => {
+      const filtered = filterProductsByPrice(mockProducts, 2000, 3000);
+      expect(filtered.length).toBe(0);
+    });
+
+    it('returns all products in range when all match the criteria', () => {
+      const filtered = filterProductsByPrice(mockProducts, 100, 2000);
+      expect(filtered.length).toBe(4); // Excludes the one with undefined price
+      expect(filtered.every(p => p.price !== undefined)).toBe(true);
+    });
+
+    it('excludes products with undefined or null price values', () => {
+      const productsWithNullPrice = [
+        ...mockProducts,
+        {
+          id: '6',
+          name: 'Null Price Phone',
+          price: null as any,
+          images: ['image6.jpg'],
+          mainImage: 'image6.jpg',
+          categoryId: 'electronics',
+          category: 'Electronics'
+        }
+      ];
+      
+      const filtered = filterProductsByPrice(productsWithNullPrice, 100, 2000);
+      expect(filtered.length).toBe(4);
+      expect(filtered.every(p => p.price !== undefined && p.price !== null)).toBe(true);
+    });
+
+    it('returns a new array and does not modify the original array', () => {
+      const original = [...mockProducts];
+      const filtered = filterProductsByPrice(mockProducts, 500);
+      
+      // Verify original array is unchanged
+      expect(mockProducts).toEqual(original);
+      
+      // Verify filtered array is different from original
+      expect(filtered).not.toBe(mockProducts);
+    });
+
+    it('handles edge case where min price equals max price', () => {
+      // Add a product with price exactly 500
+      const productsWithExactPrice = [
+        ...mockProducts,
+        {
+          id: '6',
+          name: 'Exact Price Phone',
+          price: 500,
+          images: ['image6.jpg'],
+          mainImage: 'image6.jpg',
+          categoryId: 'electronics',
+          category: 'Electronics'
+        }
+      ];
+      
+      const filtered = filterProductsByPrice(productsWithExactPrice, 500, 500);
+      expect(filtered.length).toBe(1);
+      expect(filtered[0].name).toBe('Exact Price Phone');
+      expect(filtered[0].price).toBe(500);
+    });
+  });
+
+  describe('applyClientSideFilters', () => {
+    // Mock product data for testing
+    const mockProducts: Product[] = [
+      {
+        id: '1',
+        name: 'Budget Phone',
+        price: 199.99,
+        images: ['image1.jpg'],
+        mainImage: 'image1.jpg',
+        categoryId: 'electronics',
+        category: 'Electronics'
+      },
+      {
+        id: '2',
+        name: 'Mid-range Phone',
+        price: 499.99,
+        images: ['image2.jpg'],
+        mainImage: 'image2.jpg',
+        categoryId: 'electronics',
+        category: 'Electronics'
+      },
+      {
+        id: '3',
+        name: 'Premium Phone',
+        price: 999.99,
+        images: ['image3.jpg'],
+        mainImage: 'image3.jpg',
+        categoryId: 'electronics',
+        category: 'Electronics'
+      },
+      {
+        id: '4',
+        name: 'Luxury Phone',
+        price: 1499.99,
+        images: ['image4.jpg'],
+        mainImage: 'image4.jpg',
+        categoryId: 'electronics',
+        category: 'Electronics'
+      }
+    ];
+
+    it('returns all products when no filters are applied', () => {
+      const filters: ProductFilter = {};
+      const filtered = applyClientSideFilters(mockProducts, filters);
+      expect(filtered).toEqual(mockProducts);
+      expect(filtered.length).toBe(4);
+    });
+
+    it('applies min price filter correctly', () => {
+      const filters: ProductFilter = { minPrice: 500 };
+      const filtered = applyClientSideFilters(mockProducts, filters);
+      expect(filtered.length).toBe(2);
+      expect(filtered.map(p => p.name)).toEqual(['Premium Phone', 'Luxury Phone']);
+    });
+
+    it('applies max price filter correctly', () => {
+      const filters: ProductFilter = { maxPrice: 500 };
+      const filtered = applyClientSideFilters(mockProducts, filters);
+      expect(filtered.length).toBe(2);
+      expect(filtered.map(p => p.name)).toEqual(['Budget Phone', 'Mid-range Phone']);
+    });
+
+    it('applies both min and max price filters correctly', () => {
+      const filters: ProductFilter = { minPrice: 400, maxPrice: 1000 };
+      const filtered = applyClientSideFilters(mockProducts, filters);
+      expect(filtered.length).toBe(2);
+      expect(filtered.map(p => p.name)).toEqual(['Mid-range Phone', 'Premium Phone']);
+    });
+
+    it('returns no products when filters have no matches', () => {
+      const filters: ProductFilter = { minPrice: 2000, maxPrice: 3000 };
+      const filtered = applyClientSideFilters(mockProducts, filters);
+      expect(filtered.length).toBe(0);
+    });
+
+    it('returns a new array and does not modify the original array', () => {
+      const original = [...mockProducts];
+      const filters: ProductFilter = { minPrice: 500 };
+      const filtered = applyClientSideFilters(mockProducts, filters);
+      
+      // Verify original array is unchanged
+      expect(mockProducts).toEqual(original);
+      
+      // Verify filtered array is different from original
+      expect(filtered).not.toBe(mockProducts);
     });
   });
 });
