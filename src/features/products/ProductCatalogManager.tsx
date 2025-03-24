@@ -58,19 +58,22 @@ const ProductCatalogManager: React.FC = () => {
 
   // Create a version of filters without price range filters (which are handled client-side)
   // This prevents unnecessary API calls when only price range filters change
+  // Price range filtering is applied client-side in the filteredAndSortedProducts useMemo hook
   const serverSideFilters = useMemo(() => {
     const { minPrice, maxPrice, ...otherFilters } = filters;
     return otherFilters;
   }, [filters]);
 
   // Fetch products when component mounts or when server-side filters/pagination changes
+  // Note: We use serverSideFilters in the dependency array to ensure that changes to price range filters
+  // (which are handled client-side) don't trigger unnecessary API calls
   useEffect(() => {
     dispatch(fetchProducts({
       filter: serverSideFilters, // Use server-side filters that exclude price range
       page: currentPage,
       limit: itemsPerPage
     }));
-  }, [dispatch, serverSideFilters, currentPage, itemsPerPage, searchQuery]);
+  }, [dispatch, serverSideFilters, currentPage, itemsPerPage, searchQuery, selectedCategory]);
 
   // Handle view mode toggle
   const handleViewModeToggle = useCallback((mode: ProductView) => {
@@ -93,6 +96,7 @@ const ProductCatalogManager: React.FC = () => {
   }, []);
 
   // Apply client-side filtering and sorting to products
+  // This is where price range filtering is applied, after products are fetched from the server
   const filteredAndSortedProducts = useMemo(() => {
     // First apply client-side filters (price range)
     // Make sure products is an array before spreading
