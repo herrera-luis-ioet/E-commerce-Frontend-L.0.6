@@ -308,6 +308,10 @@ export const filterProductsByPrice = (
  * @param products - Array of products to filter
  * @param filters - Filter criteria to apply
  * @returns New filtered array of products
+ * 
+ * @example
+ * // Returns products filtered by price range
+ * applyClientSideFilters(products, { minPrice: 10, maxPrice: 50 });
  */
 export const applyClientSideFilters = (
   products: Product[],

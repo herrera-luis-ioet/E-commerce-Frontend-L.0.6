@@ -94,6 +94,7 @@ const ProductCatalogManager: React.FC = () => {
   }, [products, filters, sortOption]);
 
   // Calculate safe values for totalProducts and totalPages to handle cases where they might be undefined
+  // For client-side filtering, we need to use the length of the filtered products array
   const safeTotalProducts = useMemo(() => {
     return filteredAndSortedProducts.length;
   }, [filteredAndSortedProducts.length]);
