@@ -4,7 +4,7 @@ import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import ProductCatalogManager from '../ProductCatalogManager';
 import productReducer, { fetchProducts } from '../../../store/slices/productSlice';
-import filterReducer, { setSortOption } from '../../../store/slices/filterSlice';
+import filterReducer, { setSortOption, setCurrentPage, updateFilter } from '../../../store/slices/filterSlice';
 import productService from '../../../services/productService';
 import { BrowserRouter } from 'react-router-dom';
 import { SortOption } from '../../../types/product.types';
@@ -23,11 +23,30 @@ jest.mock('../../../utils/formatters', () => {
       // Return a copy of the products array to simulate sorting
       return [...products];
     }),
+    applyClientSideFilters: jest.fn((products, filters) => {
+      // Simulate client-side filtering based on price range
+      if (!filters || (!filters.minPrice && !filters.maxPrice)) {
+        return [...products];
+      }
+      
+      return products.filter(product => {
+        const price = product.price;
+        if (price === undefined || price === null) {
+          return false;
+        }
+        
+        const isAboveMin = filters.minPrice === undefined || price >= filters.minPrice;
+        const isBelowMax = filters.maxPrice === undefined || price <= filters.maxPrice;
+        
+        return isAboveMin && isBelowMax;
+      });
+    }),
     formatPrice: originalModule.formatPrice,
     formatPercentage: originalModule.formatPercentage
   };
 });
 const mockedSortProducts = formatters.sortProducts as jest.Mock;
+const mockedApplyClientSideFilters = formatters.applyClientSideFilters as jest.Mock;
 
 // Mock the components that are not relevant for this test
 jest.mock('../components/ProductGrid', () => ({
@@ -292,6 +311,58 @@ describe('ProductCatalogManager Component', () => {
     expect(mockedSortProducts).toHaveBeenCalledWith(expect.any(Array), SortOption.PRICE_LOW_TO_HIGH);
 
     // Verify that no additional API calls were made for sorting
+    expect(mockedProductService.getProducts).not.toHaveBeenCalled();
+  });
+
+  test('should apply client-side price filtering', async () => {
+    // Mock the API response
+    mockedProductService.getProducts.mockResolvedValueOnce({
+      success: true,
+      statusCode: 200,
+      data: mockProducts,
+      message: 'Products retrieved successfully'
+    });
+
+    // Render the component
+    render(
+      <Provider store={store}>
+        <BrowserRouter>
+          <ProductCatalogManager />
+        </BrowserRouter>
+      </Provider>
+    );
+
+    // Wait for the products to load
+    await waitFor(() => {
+      expect(screen.queryByTestId('spinner')).not.toBeInTheDocument();
+    });
+
+    // Reset the mock to verify no additional API calls are made when filtering
+    mockedProductService.getProducts.mockClear();
+    mockedApplyClientSideFilters.mockClear();
+
+    // Dispatch a price filter change to trigger client-side filtering
+    store.dispatch(updateFilter({ key: 'minPrice', value: 100 }));
+
+    // Verify that applyClientSideFilters was called with the correct parameters
+    expect(mockedApplyClientSideFilters).toHaveBeenCalledWith(
+      expect.any(Array),
+      expect.objectContaining({ minPrice: 100 })
+    );
+
+    // Verify that no additional API calls were made for filtering
+    expect(mockedProductService.getProducts).not.toHaveBeenCalled();
+
+    // Test with both min and max price
+    store.dispatch(updateFilter({ key: 'maxPrice', value: 200 }));
+
+    // Verify that applyClientSideFilters was called with both min and max price
+    expect(mockedApplyClientSideFilters).toHaveBeenCalledWith(
+      expect.any(Array),
+      expect.objectContaining({ minPrice: 100, maxPrice: 200 })
+    );
+
+    // Verify that no additional API calls were made for filtering
     expect(mockedProductService.getProducts).not.toHaveBeenCalled();
   });
 
