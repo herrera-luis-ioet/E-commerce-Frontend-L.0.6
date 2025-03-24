@@ -56,14 +56,21 @@ const ProductCatalogManager: React.FC = () => {
   // Local state for mobile filter visibility
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
-  // Fetch products when component mounts or when filters/pagination changes
+  // Create a version of filters without price range filters (which are handled client-side)
+  // This prevents unnecessary API calls when only price range filters change
+  const serverSideFilters = useMemo(() => {
+    const { minPrice, maxPrice, ...otherFilters } = filters;
+    return otherFilters;
+  }, [filters]);
+
+  // Fetch products when component mounts or when server-side filters/pagination changes
   useEffect(() => {
     dispatch(fetchProducts({
-      filter: filters,
+      filter: serverSideFilters, // Use server-side filters that exclude price range
       page: currentPage,
       limit: itemsPerPage
     }));
-  }, [dispatch, filters, currentPage, itemsPerPage, searchQuery]);
+  }, [dispatch, serverSideFilters, currentPage, itemsPerPage, searchQuery]);
 
   // Handle view mode toggle
   const handleViewModeToggle = useCallback((mode: ProductView) => {
