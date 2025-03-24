@@ -88,7 +88,9 @@ const ProductCatalogManager: React.FC = () => {
   // Apply client-side filtering and sorting to products
   const filteredAndSortedProducts = useMemo(() => {
     // First apply client-side filters (price range)
-    const filteredProducts = applyClientSideFilters([...products], filters);
+    // Make sure products is an array before spreading
+    const productsArray = Array.isArray(products) ? products : [];
+    const filteredProducts = applyClientSideFilters([...productsArray], filters);
     // Then apply sorting
     return sortProducts(filteredProducts, sortOption);
   }, [products, filters, sortOption]);
@@ -96,12 +98,13 @@ const ProductCatalogManager: React.FC = () => {
   // Calculate safe values for totalProducts and totalPages to handle cases where they might be undefined
   // For client-side filtering, we need to use the length of the filtered products array
   const safeTotalProducts = useMemo(() => {
-    return filteredAndSortedProducts.length;
-  }, [filteredAndSortedProducts.length]);
+    return filteredAndSortedProducts ? filteredAndSortedProducts.length : 0;
+  }, [filteredAndSortedProducts]);
 
   const safeTotalPages = useMemo(() => {
-    return Math.max(1, Math.ceil(filteredAndSortedProducts.length / itemsPerPage));
-  }, [filteredAndSortedProducts.length, itemsPerPage]);
+    const productsLength = filteredAndSortedProducts ? filteredAndSortedProducts.length : 0;
+    return Math.max(1, Math.ceil(productsLength / itemsPerPage));
+  }, [filteredAndSortedProducts, itemsPerPage]);
 
   // Memoize the product display component to prevent unnecessary re-renders
   const ProductDisplay = useMemo(() => {
@@ -122,7 +125,7 @@ const ProductCatalogManager: React.FC = () => {
       );
     }
 
-    if (filteredAndSortedProducts.length === 0) {
+    if (!filteredAndSortedProducts || filteredAndSortedProducts.length === 0) {
       return (
         <div className="text-center py-10">
           <h3 className="text-lg font-medium text-gray-900">No products found</h3>

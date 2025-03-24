@@ -9,11 +9,13 @@ import ProductCatalogManager from '../ProductCatalogManager';
 import { BrowserRouter } from 'react-router-dom';
 import { sortProducts } from '../../../utils/formatters';
 
-// Mock the sortProducts utility function
+// Mock the formatters utility functions
 jest.mock('../../../utils/formatters', () => ({
   sortProducts: jest.fn().mockImplementation((products) => products),
+  applyClientSideFilters: jest.fn().mockImplementation((products) => products),
   formatPrice: jest.fn(),
-  formatPercentage: jest.fn()
+  formatPercentage: jest.fn(),
+  filterProductsByPrice: jest.fn().mockImplementation((products) => products)
 }));
 
 // Mock the components that are not relevant for this test
