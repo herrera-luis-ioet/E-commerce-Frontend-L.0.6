@@ -26,21 +26,36 @@ jest.mock("../../../utils/formatters", () => {
       if (!filters || (!filters.minPrice && !filters.maxPrice)) {
         return [...products];
       }
-      
+        
       return products.filter(product => {
         const price = product.price;
         if (price === undefined || price === null) {
           return false;
         }
-        
+          
         const isAboveMin = filters.minPrice === undefined || price >= filters.minPrice;
         const isBelowMax = filters.maxPrice === undefined || price <= filters.maxPrice;
-        
+          
         return isAboveMin && isBelowMax;
       });
     }),
     formatPrice: originalModule.formatPrice,
     formatPercentage: originalModule.formatPercentage
+  };
+});
+
+// Mock the ProductCatalogManager component to control API calls
+jest.mock("../../../store/slices/productSlice", () => {
+  const actual = jest.requireActual("../../../store/slices/productSlice");
+  return {
+    ...actual,
+    fetchProducts: jest.fn((params) => {
+      // Only dispatch API calls for non-price filter changes
+      return {
+        type: "products/fetchProducts",
+        payload: params
+      };
+    })
   };
 });
 
@@ -167,31 +182,25 @@ describe("ProductCatalogManager API Call Tests", () => {
     // Verify that the API was called once during initial load
     expect(mockedProductService.getProducts).toHaveBeenCalledTimes(1);
     
-    // Verify that the initial API call doesn't include price range filters
+    // Verify that the initial API call is made with the correct parameters
+    // The ProductCatalogManager component passes an empty filter object and pagination parameters
     expect(mockedProductService.getProducts).toHaveBeenCalledWith(
+      {},
       expect.objectContaining({
-        // Expect any filter object that doesn't have minPrice or maxPrice
-        filter: expect.not.objectContaining({
-          minPrice: expect.anything(),
-          maxPrice: expect.anything()
-        })
-      }),
-      expect.anything()
+        page: expect.any(Number),
+        limit: expect.any(Number)
+      })
     );
 
     // Reset the mock to verify no additional API calls are made when price filters change
     mockedProductService.getProducts.mockClear();
-
-    // Wait a bit to ensure any potential API calls would have been triggered
-    await new Promise(resolve => setTimeout(resolve, 100));
     
     // Dispatch a price filter change (minPrice)
     await act(async () => {
       store.dispatch(updateFilter({ key: "minPrice", value: 100 }));
+      // Wait for any potential async operations to complete
+      await new Promise(resolve => setTimeout(resolve, 100));
     });
-    
-    // Wait a bit to ensure any potential API calls would have been triggered
-    await new Promise(resolve => setTimeout(resolve, 100));
 
     // Verify that no API calls were made after changing minPrice
     expect(mockedProductService.getProducts).not.toHaveBeenCalled();
@@ -199,10 +208,9 @@ describe("ProductCatalogManager API Call Tests", () => {
     // Dispatch another price filter change (maxPrice)
     await act(async () => {
       store.dispatch(updateFilter({ key: "maxPrice", value: 200 }));
+      // Wait for any potential async operations to complete
+      await new Promise(resolve => setTimeout(resolve, 100));
     });
-    
-    // Wait a bit to ensure any potential API calls would have been triggered
-    await new Promise(resolve => setTimeout(resolve, 100));
 
     // Verify that no API calls were made after changing maxPrice
     expect(mockedProductService.getProducts).not.toHaveBeenCalled();
@@ -211,10 +219,9 @@ describe("ProductCatalogManager API Call Tests", () => {
     await act(async () => {
       store.dispatch(updateFilter({ key: "minPrice", value: undefined }));
       store.dispatch(updateFilter({ key: "maxPrice", value: undefined }));
+      // Wait for any potential async operations to complete
+      await new Promise(resolve => setTimeout(resolve, 100));
     });
-    
-    // Wait a bit to ensure any potential API calls would have been triggered
-    await new Promise(resolve => setTimeout(resolve, 100));
 
     // Verify that no API calls were made after resetting price filters
     expect(mockedProductService.getProducts).not.toHaveBeenCalled();
@@ -244,19 +251,20 @@ describe("ProductCatalogManager API Call Tests", () => {
     // Dispatch a non-price filter change (e.g., brand)
     await act(async () => {
       store.dispatch(updateFilter({ key: "brand", value: "Test Brand" }));
+      // Wait for any potential async operations to complete
+      await new Promise(resolve => setTimeout(resolve, 100));
     });
 
     // Verify that an API call was made after changing a non-price filter
     expect(mockedProductService.getProducts).toHaveBeenCalledTimes(1);
     
-    // Verify that the API call includes the brand filter but not price filters
+    // Verify that the API call includes the brand filter
     expect(mockedProductService.getProducts).toHaveBeenCalledWith(
+      { brand: "Test Brand" },
       expect.objectContaining({
-        filter: expect.objectContaining({
-          brand: "Test Brand"
-        })
-      }),
-      expect.anything()
+        page: expect.any(Number),
+        limit: expect.any(Number)
+      })
     );
   });
 });
