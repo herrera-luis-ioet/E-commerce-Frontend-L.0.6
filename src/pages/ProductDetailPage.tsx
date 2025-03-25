@@ -1,8 +1,10 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import ProductDetail from '../features/products/components/ProductDetail';
 import { Product } from '../types/product.types';
+import { useAppDispatch } from '../store/hooks';
+import { addToCart } from '../store/slices/cartSlice';
 
 /**
  * PUBLIC_INTERFACE
@@ -14,13 +16,25 @@ import { Product } from '../types/product.types';
 const ProductDetailPage: React.FC = () => {
   const { productId } = useParams<{ productId: string }>();
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const [addedToCart, setAddedToCart] = useState(false);
   
   // Handle adding product to cart
   const handleAddToCart = useCallback((product: Product, quantity: number) => {
-    // TODO: Implement cart functionality
+    // Dispatch the addToCart action
+    dispatch(addToCart({ product, quantity }));
+    
+    // Show feedback
+    setAddedToCart(true);
+    
+    // Reset feedback after 2 seconds
+    setTimeout(() => {
+      setAddedToCart(false);
+    }, 2000);
+    
+    // Optional: Show a visual feedback in the UI
     console.log(`Added ${quantity} of ${product.name} to cart`);
-    // Show a toast notification or feedback to the user
-  }, []);
+  }, [dispatch]);
   
   // Handle viewing details of a related product
   const handleViewDetails = useCallback((product: Product) => {

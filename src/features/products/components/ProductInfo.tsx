@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Product } from '../../../types/product.types';
 import Button from '../../../components/ui/Button';
 import { formatPrice } from '../../../utils/formatters';
+import { useAppDispatch } from '../../../store/hooks';
+import { addToCart } from '../../../store/slices/cartSlice';
 
 /**
  * ProductInfo component props
@@ -24,8 +26,28 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
   onAddToCart,
   className = '',
 }) => {
-  // State for quantity
+  // State for quantity and feedback
   const [quantity, setQuantity] = useState<number>(1);
+  const [addedToCart, setAddedToCart] = useState(false);
+  const dispatch = useAppDispatch();
+  
+  // Handle adding to cart with feedback
+  const handleAddToCart = (product: Product, quantity: number) => {
+    dispatch(addToCart({ product, quantity }));
+    
+    // Show feedback
+    setAddedToCart(true);
+    
+    // Reset feedback after 2 seconds
+    setTimeout(() => {
+      setAddedToCart(false);
+    }, 2000);
+    
+    // Call the parent handler if provided
+    if (onAddToCart) {
+      onAddToCart(product, quantity);
+    }
+  };
 
   // Calculate discount price if product is on sale
   const discountedPrice = product.onSale && product.discountPercentage
@@ -254,10 +276,11 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
           <Button
             variant="primary"
             size="lg"
-            onClick={() => onAddToCart && onAddToCart(product, quantity)}
+            onClick={() => handleAddToCart(product, quantity)}
             className="w-full md:w-auto"
+            isLoading={addedToCart}
           >
-            Add to Cart
+            {addedToCart ? 'Added to Cart!' : 'Add to Cart'}
           </Button>
         </div>
       )}

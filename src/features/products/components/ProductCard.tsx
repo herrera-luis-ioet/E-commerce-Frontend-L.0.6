@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Product } from '../../../types/product.types';
 import Card from '../../../components/ui/Card';
 import Spinner from '../../../components/ui/Spinner';
 import Button from '../../../components/ui/Button';
 import { formatPrice } from '../../../utils/formatters';
+import { useAppDispatch } from '../../../store/hooks';
+import { addToCart } from '../../../store/slices/cartSlice';
 
 /**
  * ProductCard component props
@@ -38,6 +40,26 @@ const ProductCard: React.FC<ProductCardProps> = ({
   onAddToCart,
   className = '',
 }) => {
+  const dispatch = useAppDispatch();
+  const [addedToCart, setAddedToCart] = useState(false);
+  
+  // Handle adding to cart with feedback
+  const handleAddToCart = (product: Product) => {
+    dispatch(addToCart({ product }));
+    
+    // Show feedback
+    setAddedToCart(true);
+    
+    // Reset feedback after 2 seconds
+    setTimeout(() => {
+      setAddedToCart(false);
+    }, 2000);
+    
+    // Call the parent handler if provided
+    if (onAddToCart) {
+      onAddToCart(product);
+    }
+  };
   // Handle loading state
   if (isLoading) {
     return (
@@ -124,9 +146,10 @@ const ProductCard: React.FC<ProductCardProps> = ({
         variant="primary" 
         size="sm" 
         fullWidth
-        onClick={() => onAddToCart && onAddToCart(product)}
+        onClick={() => handleAddToCart(product)}
+        isLoading={addedToCart}
       >
-        Add to Cart
+        {addedToCart ? 'Added!' : 'Add to Cart'}
       </Button>
       <Button 
         variant="outline" 
