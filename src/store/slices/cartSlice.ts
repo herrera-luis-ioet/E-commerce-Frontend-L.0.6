@@ -50,14 +50,14 @@ const cartSlice = createSlice({
         // If item already exists, update quantity
         state.items[existingItemIndex].quantity += quantity;
         state.items[existingItemIndex].price = product.price * state.items[existingItemIndex].quantity;
-        state.items[existingItemIndex].finalPrice = product.discountPrice 
+        state.items[existingItemIndex].finalPrice = product.discountPrice != null 
           ? product.discountPrice * state.items[existingItemIndex].quantity 
           : state.items[existingItemIndex].price;
       } else {
         // Add new item
         const price = product.price * quantity;
-        const finalPrice = product.discountPrice ? product.discountPrice * quantity : price;
-        const hasDiscount = !!product.discountPrice;
+        const finalPrice = product.discountPrice != null ? product.discountPrice * quantity : price;
+        const hasDiscount = product.discountPrice != null;
         
         state.items.push({
           product,
@@ -102,7 +102,7 @@ const cartSlice = createSlice({
           // Update quantity
           state.items[itemIndex].quantity = quantity;
           state.items[itemIndex].price = state.items[itemIndex].product.price * quantity;
-          state.items[itemIndex].finalPrice = state.items[itemIndex].product.discountPrice 
+          state.items[itemIndex].finalPrice = state.items[itemIndex].product.discountPrice != null 
             ? state.items[itemIndex].product.discountPrice * quantity 
             : state.items[itemIndex].price;
         }

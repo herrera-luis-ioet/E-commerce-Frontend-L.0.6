@@ -14,8 +14,11 @@ export interface Product {
   description: string;
   /** Price of the product in the default currency */
   price: number;
-  /** Discounted price of the product (if on sale) */
-  discountPrice?: number;
+  /** 
+   * Discounted price of the product (if on sale)
+   * This is calculated based on the price and discountPercentage when onSale is true
+   */
+  discountPrice?: number | null;
   /** Array of image URLs for the product */
   images: string[];
   /** Main product image URL */
