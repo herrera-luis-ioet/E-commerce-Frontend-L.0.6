@@ -1,5 +1,6 @@
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 import type { RootState, AppDispatch } from './index';
+import { CartItem } from '../types/cart.types';
 
 // Use throughout your app instead of plain `useDispatch` and `useSelector`
 export const useAppDispatch = () => useDispatch<AppDispatch>();
@@ -60,5 +61,32 @@ export const useProductFiltering = () => {
     searchQuery,
     categories,
     selectedCategory
+  };
+};
+
+// Custom hooks for cart state
+export const useCartItems = () => useAppSelector((state) => state.cart.items);
+export const useCartTotalItems = () => useAppSelector((state) => state.cart.totalItems);
+export const useCartTotalPrice = () => useAppSelector((state) => state.cart.totalPrice);
+export const useCartLoading = () => useAppSelector((state) => state.cart.loading);
+export const useCartError = () => useAppSelector((state) => state.cart.error);
+export const useCartOpen = () => useAppSelector((state) => state.cart.isOpen);
+
+// Combined hook for cart state
+export const useCart = () => {
+  const items = useCartItems();
+  const totalItems = useCartTotalItems();
+  const totalPrice = useCartTotalPrice();
+  const loading = useCartLoading();
+  const error = useCartError();
+  const isOpen = useCartOpen();
+  
+  return {
+    items,
+    totalItems,
+    totalPrice,
+    loading,
+    error,
+    isOpen
   };
 };
