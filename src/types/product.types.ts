@@ -14,6 +14,8 @@ export interface Product {
   description: string;
   /** Price of the product in the default currency */
   price: number;
+  /** Discounted price of the product (if on sale) */
+  discountPrice?: number;
   /** Array of image URLs for the product */
   images: string[];
   /** Main product image URL */

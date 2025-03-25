@@ -8,16 +8,17 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <>
       <Header />
-    <main className="container mx-auto py-6 flex-grow">
-      {children}
-    </main>
-    <footer className="bg-secondary text-white p-4 mt-auto">
-      <div className="container mx-auto text-center">
-        <p>&copy; {new Date().getFullYear()} E-Commerce Platform. All rights reserved.</p>
-      </div>
-    </footer>
-  </>
-);
+      <main className="container mx-auto py-6 flex-grow">
+        {children}
+      </main>
+      <footer className="bg-secondary text-white p-4 mt-auto">
+        <div className="container mx-auto text-center">
+          <p>&copy; {new Date().getFullYear()} E-Commerce Platform. All rights reserved.</p>
+        </div>
+      </footer>
+    </>
+  );
+};
 
 // Lazy-loaded page components
 const Home = lazy(() => import('../pages/Home'));
