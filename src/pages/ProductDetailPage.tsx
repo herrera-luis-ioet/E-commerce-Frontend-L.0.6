@@ -21,7 +21,8 @@ const ProductDetailPage: React.FC = () => {
   
   // Handle adding product to cart
   const handleAddToCart = useCallback((product: Product, quantity: number) => {
-    // Dispatch the addToCart action
+    // Dispatch the addToCart action with the exact quantity from the selector
+    // This fixes the issue where double the quantity was being added to cart
     dispatch(addToCart({ product, quantity }));
     
     // Show feedback
