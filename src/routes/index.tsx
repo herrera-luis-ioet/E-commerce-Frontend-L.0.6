@@ -1,21 +1,35 @@
 import React, { Suspense, lazy } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, Link } from 'react-router-dom';
 import Spinner from '../components/ui/Spinner';
+import { useCart } from '../store/hooks';
 
 // Layout component with header and footer
-const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <>
-    <header className="bg-primary text-white p-4 shadow-md">
-      <div className="container mx-auto flex justify-between items-center">
-        <h1 className="text-xl font-bold">E-Commerce Platform</h1>
-        <nav>
-          <ul className="flex space-x-4">
-            <li><a href="/" className="hover:underline">Home</a></li>
-            <li><a href="/products" className="hover:underline">Products</a></li>
-          </ul>
-        </nav>
-      </div>
-    </header>
+const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { totalItems } = useCart();
+  
+  return (
+    <>
+      <header className="bg-primary text-white p-4 shadow-md">
+        <div className="container mx-auto flex justify-between items-center">
+          <h1 className="text-xl font-bold">E-Commerce Platform</h1>
+          <nav>
+            <ul className="flex space-x-4 items-center">
+              <li><Link to="/" className="hover:underline">Home</Link></li>
+              <li><Link to="/products" className="hover:underline">Products</Link></li>
+              <li>
+                <Link to="/cart" className="hover:underline flex items-center">
+                  <span className="mr-1">Cart</span>
+                  {totalItems > 0 && (
+                    <span className="bg-white text-primary text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                      {totalItems}
+                    </span>
+                  )}
+                </Link>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </header>
     <main className="container mx-auto py-6 flex-grow">
       {children}
     </main>
@@ -32,6 +46,7 @@ const Home = lazy(() => import('../pages/Home'));
 const ProductListingPage = lazy(() => import('../pages/ProductListingPage'));
 const ProductDetailPage = lazy(() => import('../pages/ProductDetailPage'));
 const CategoryPage = lazy(() => import('../pages/CategoryPage'));
+const CartPage = lazy(() => import('../pages/CartPage'));
 const NotFoundPage = lazy(() => import('../pages/NotFoundPage'));
 
 // Loading fallback component
@@ -62,6 +77,9 @@ const AppRoutes: React.FC = () => {
           
           {/* Category page with category ID parameter */}
           <Route path="/categories/:categoryId" element={<CategoryPage />} />
+          
+          {/* Cart page */}
+          <Route path="/cart" element={<CartPage />} />
           
           {/* 404 page */}
           <Route path="/404" element={<NotFoundPage />} />
