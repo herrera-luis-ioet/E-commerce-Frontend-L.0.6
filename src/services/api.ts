@@ -10,9 +10,7 @@ import {
   PaginatedResponse,
   RequestParams,
   ApiStatusCode,
-  Endpoints
 } from '../types/api.types';
-import { mockProducts, mockCategories, filterProducts, paginateResults } from './mockData';
 
 /**
  * Default API configuration
@@ -25,9 +23,6 @@ const API_CONFIG = {
     'Accept': 'application/json',
   },
 };
-
-// Flag to enable/disable mock API
-const USE_MOCK_API = process.env.REACT_APP_USE_MOCK_API === 'true' || true;
 
 /**
  * API Service class for handling HTTP requests
@@ -137,10 +132,6 @@ class ApiService {
    * @private
    */
   private async request<T>(config: ApiRequestConfig): Promise<ApiResponse<T>> {
-    if (USE_MOCK_API) {
-      return this.handleMockRequest<T>(config);
-    }
-
     try {
       const axiosConfig: AxiosRequestConfig = {
         url: config.url,
@@ -157,76 +148,6 @@ class ApiService {
     } catch (error) {
       throw this.handleError(error);
     }
-  }
-
-  /**
-   * Handle mock API requests
-   * @private
-   */
-  private async handleMockRequest<T>(config: ApiRequestConfig): Promise<ApiResponse<T>> {
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    switch (config.url) {
-      case Endpoints.PRODUCTS:
-        return this.handleMockProducts<T>(config);
-      case Endpoints.CATEGORIES:
-        return this.handleMockCategories<T>();
-      default:
-        if (config.url.startsWith(Endpoints.PRODUCT_BY_ID)) {
-          const productId = config.url.split('/').pop();
-          return this.handleMockProductById<T>(productId!);
-        }
-        throw this.handleError(new Error('Not Found'));
-    }
-  }
-
-  /**
-   * Handle mock products request
-   * @private
-   */
-  private handleMockProducts<T>(config: ApiRequestConfig): ApiResponse<T> {
-    const params = config.params || {};
-    const filtered = filterProducts(mockProducts, params);
-    const page = Number(params.page) || 1;
-    const limit = Number(params.limit) || 10;
-    const { items, meta } = paginateResults(filtered, page, limit);
-
-    return {
-      success: true,
-      data: items as unknown as T,
-      statusCode: ApiStatusCode.OK,
-      meta
-    };
-  }
-
-  /**
-   * Handle mock categories request
-   * @private
-   */
-  private handleMockCategories<T>(): ApiResponse<T> {
-    return {
-      success: true,
-      data: mockCategories as unknown as T,
-      statusCode: ApiStatusCode.OK
-    };
-  }
-
-  /**
-   * Handle mock product by ID request
-   * @private
-   */
-  private handleMockProductById<T>(productId: string): ApiResponse<T> {
-    const product = mockProducts.find(p => p.id === productId);
-    if (!product) {
-      throw this.handleError(new Error('Product not found'));
-    }
-
-    return {
-      success: true,
-      data: product as unknown as T,
-      statusCode: ApiStatusCode.OK
-    };
   }
 
   /**
