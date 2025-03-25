@@ -102,8 +102,9 @@ const cartSlice = createSlice({
           // Update quantity
           state.items[itemIndex].quantity = quantity;
           state.items[itemIndex].price = state.items[itemIndex].product.price * quantity;
-          state.items[itemIndex].finalPrice = state.items[itemIndex].product.discountPrice != null 
-            ? state.items[itemIndex].product.discountPrice * quantity 
+          const discountPrice = state.items[itemIndex].product.discountPrice;
+          state.items[itemIndex].finalPrice = discountPrice != null 
+            ? discountPrice * quantity 
             : state.items[itemIndex].price;
         }
         
