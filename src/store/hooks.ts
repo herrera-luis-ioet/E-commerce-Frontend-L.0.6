@@ -1,12 +1,25 @@
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 import type { RootState, AppDispatch } from './index';
+import { Product } from '../types/product.types';
 
 // Use throughout your app instead of plain `useDispatch` and `useSelector`
 export const useAppDispatch = () => useDispatch<AppDispatch>();
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
 // Custom hooks for product state
-export const useProducts = () => useAppSelector((state) => state.products.products);
+/**
+ * PUBLIC_INTERFACE
+ * Hook to access products from the Redux store
+ * 
+ * This hook safely retrieves the products array from the Redux store,
+ * ensuring it always returns a valid array even if the products state is not initialized.
+ * It handles potential edge cases and ensures type safety.
+ * 
+ * @returns An array of Product objects
+ */
+export const useProducts = (): Product[] => {
+  return useAppSelector((state) => state.products?.products || []);
+};
 export const useSelectedProduct = () => useAppSelector((state) => state.products.selectedProduct);
 export const useCategories = () => useAppSelector((state) => state.products.categories);
 export const useSelectedCategory = () => useAppSelector((state) => state.products.selectedCategory);

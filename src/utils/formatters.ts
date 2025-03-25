@@ -300,6 +300,54 @@ export const filterProductsByPrice = (
 
 /**
  * PUBLIC_INTERFACE
+ * Filters an array of products based on a search query
+ * 
+ * This function takes an array of products and a search query string,
+ * and returns a new array containing only products whose names or descriptions match the search query.
+ * The search is case-insensitive and returns products where either the name or description contains the search query.
+ * 
+ * @param products - Array of products to filter
+ * @param searchQuery - Search query string to filter by
+ * @returns New filtered array of products
+ * 
+ * @example
+ * // Returns products with names or descriptions containing "phone"
+ * filterProductsBySearchQuery(products, "phone");
+ * 
+ * @example
+ * // Returns all products when search query is empty
+ * filterProductsBySearchQuery(products, "");
+ * 
+ * @example
+ * // Returns empty array when no products match the search query
+ * filterProductsBySearchQuery(products, "nonexistent");
+ */
+export const filterProductsBySearchQuery = (
+  products: Product[],
+  searchQuery: string
+): Product[] => {
+  // If search query is empty, return all products
+  if (!searchQuery || searchQuery.trim() === '') {
+    return products;
+  }
+  
+  // Convert search query to lowercase for case-insensitive comparison
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+  
+  // Create a copy of the array to avoid mutating the original
+  return products.filter(product => {
+    // Handle undefined or null product name and description
+    const productName = product.name ?? '';
+    const productDescription = product.description ?? '';
+    
+    // Check if either product name or description contains the search query (case-insensitive)
+    return productName.toLowerCase().includes(normalizedQuery) || 
+           productDescription.toLowerCase().includes(normalizedQuery);
+  });
+};
+
+/**
+ * PUBLIC_INTERFACE
  * Applies all client-side filters to an array of products
  * 
  * This function takes an array of products and a filter object,
@@ -325,6 +373,14 @@ export const applyClientSideFilters = (
     filters.minPrice,
     filters.maxPrice
   );
+  
+  // Apply search query filter if present
+  if (filters.searchQuery) {
+    filteredProducts = filterProductsBySearchQuery(
+      filteredProducts,
+      filters.searchQuery
+    );
+  }
   
   // Additional client-side filters can be added here in the future
   

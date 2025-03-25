@@ -1,6 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useAppDispatch, useSearchQuery } from '../../../store/hooks';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useAppDispatch, useSearchQuery, useProducts } from '../../../store/hooks';
 import { setSearchQuery } from '../../../store/slices/filterSlice';
+import { filterProductsBySearchQuery } from '../../../utils/formatters';
+import { Product } from '../../../types/product.types';
 import Input from '../../../components/ui/Input';
 
 /**
@@ -13,52 +15,175 @@ interface SearchBarProps {
   debounceDelay?: number;
   /** Additional CSS classes */
   className?: string;
+  /** Callback function when products are filtered */
+  onProductsFiltered?: (filteredProducts: Product[]) => void;
+  /** Products to filter (if not provided, will use products from Redux store) */
+  products?: Product[];
+  /** Initial search query (if not provided, will use query from Redux store) */
+  initialQuery?: string;
+  /** Whether to update the Redux store with the search query */
+  updateReduxStore?: boolean;
 }
 
 /**
  * PUBLIC_INTERFACE
- * SearchBar component with debounce functionality
+ * SearchBar component with debounce functionality and client-side filtering
  * 
  * This component renders a search input that updates the Redux store
- * with a debounce to prevent excessive API calls.
+ * with a debounce and performs client-side filtering of products using the
+ * filterProductsBySearchQuery utility function. It retrieves products from
+ * the Redux store using the useProducts hook or accepts external products via props.
  */
 const SearchBar: React.FC<SearchBarProps> = ({
   placeholder = 'Search products...',
   debounceDelay = 500,
   className = '',
+  onProductsFiltered,
+  products: externalProducts,
+  initialQuery,
+  updateReduxStore = true,
 }) => {
   const dispatch = useAppDispatch();
   const storeSearchQuery = useSearchQuery();
   
+  // Get products from Redux store
+  const storeProducts = useProducts();
+  
+  // Create a ref to store the debounce timeout
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Determine initial input value - use prop if provided, otherwise use Redux store
+  const initialInputValue = initialQuery !== undefined ? initialQuery : storeSearchQuery;
+  
   // Local state for the input value
-  const [inputValue, setInputValue] = useState(storeSearchQuery);
+  const [inputValue, setInputValue] = useState<string>(initialInputValue);
+  // State for tracking if there was an error during filtering
+  const [filterError, setFilterError] = useState<string | null>(null);
   
-  // Update local state when store value changes
+  // Use external products if provided, otherwise use products from Redux store
+  const productsToFilter = useMemo(() => {
+    try {
+      // If external products are provided, use them
+      if (externalProducts) {
+        return externalProducts;
+      }
+      
+      // Otherwise, use products from Redux store
+      return storeProducts || [];
+    } catch (error) {
+      console.error('Error determining products to filter:', error);
+      setFilterError('Error loading products');
+      return [];
+    }
+  }, [externalProducts, storeProducts]);
+  
+  // Update local state when store value changes, but only if we're not using initialQuery
   useEffect(() => {
-    setInputValue(storeSearchQuery);
-  }, [storeSearchQuery]);
+    if (initialQuery === undefined && storeSearchQuery !== inputValue) {
+      setInputValue(storeSearchQuery);
+    }
+  }, [storeSearchQuery, initialQuery, inputValue]);
   
-  // Debounced search handler
+  // Filter products based on search query for client-side filtering
+  const filteredProducts = useMemo(() => {
+    try {
+      setFilterError(null);
+      
+      // Only perform filtering if we have products
+      if (!productsToFilter || productsToFilter.length === 0) {
+        return [];
+      }
+      
+      // Perform client-side filtering using the filterProductsBySearchQuery utility
+      return filterProductsBySearchQuery(productsToFilter, inputValue);
+    } catch (error) {
+      console.error('Error filtering products:', error);
+      setFilterError('Error filtering products');
+      return [];
+    }
+  }, [inputValue, productsToFilter]);
+  
+  // Call the callback with filtered products if provided
+  useEffect(() => {
+    if (onProductsFiltered) {
+      try {
+        onProductsFiltered(filteredProducts);
+      } catch (error) {
+        console.error('Error in onProductsFiltered callback:', error);
+      }
+    }
+  }, [filteredProducts, onProductsFiltered]);
+  
+  // Cleanup the debounce timeout when the component unmounts
+  useEffect(() => {
+    return () => {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+        debounceTimeoutRef.current = null;
+      }
+    };
+  }, []);
+  
+  // Debounced search handler to update Redux store
   const debouncedSearch = useCallback((value: string) => {
-    const handler = debounce((searchValue: string) => {
-      dispatch(setSearchQuery(searchValue));
-    }, debounceDelay);
+    // Clear any existing timeout
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+      debounceTimeoutRef.current = null;
+    }
     
-    handler(value);
-  }, [dispatch, debounceDelay]);
+    // Set a new timeout
+    debounceTimeoutRef.current = setTimeout(() => {
+      try {
+        // Only update Redux store if updateReduxStore is true
+        if (updateReduxStore) {
+          dispatch(setSearchQuery(value));
+        }
+      } catch (error) {
+        console.error('Error updating search query in Redux store:', error);
+      }
+    }, debounceDelay);
+  }, [dispatch, debounceDelay, updateReduxStore]);
   
   // Handle input change
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setInputValue(value);
-    debouncedSearch(value);
-  };
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      const value = e.target.value;
+      // Update local state immediately to reflect in the UI
+      setInputValue(value);
+      // Trigger debounced search for Redux update
+      debouncedSearch(value);
+    } catch (error) {
+      console.error('Error handling input change:', error);
+    }
+  }, [debouncedSearch]);
   
   // Handle clear button click
-  const handleClear = () => {
-    setInputValue('');
-    dispatch(setSearchQuery(''));
-  };
+  const handleClear = useCallback(() => {
+    try {
+      // Update local state immediately to clear the input
+      setInputValue('');
+      
+      // Clear any existing timeout
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+        debounceTimeoutRef.current = null;
+      }
+      
+      // Only update Redux store if updateReduxStore is true
+      if (updateReduxStore) {
+        // Update Redux store immediately without debounce when clearing
+        dispatch(setSearchQuery(''));
+      }
+      
+      // If onProductsFiltered is provided, call it with all products
+      if (onProductsFiltered) {
+        onProductsFiltered(productsToFilter);
+      }
+    } catch (error) {
+      console.error('Error clearing search:', error);
+    }
+  }, [dispatch, onProductsFiltered, productsToFilter, updateReduxStore]);
   
   // Render search icon
   const searchIcon = (
@@ -68,6 +193,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
       fill="none" 
       viewBox="0 0 24 24" 
       stroke="currentColor"
+      aria-hidden="true"
     >
       <path 
         strokeLinecap="round" 
@@ -92,6 +218,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         fill="none" 
         viewBox="0 0 24 24" 
         stroke="currentColor"
+        aria-hidden="true"
       >
         <path 
           strokeLinecap="round" 
@@ -116,28 +243,13 @@ const SearchBar: React.FC<SearchBarProps> = ({
         aria-label="Search products"
         data-testid="search-input"
       />
+      {filterError && (
+        <div className="text-red-500 text-sm mt-1" role="alert">
+          {filterError}
+        </div>
+      )}
     </div>
   );
 };
-
-/**
- * Debounce function to limit how often a function is called
- */
-function debounce<T extends (...args: any[]) => any>(
-  func: T,
-  wait: number
-): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout | null = null;
-  
-  return function(...args: Parameters<T>) {
-    const later = () => {
-      timeout = null;
-      func(...args);
-    };
-    
-    if (timeout) clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-  };
-}
 
 export default SearchBar;

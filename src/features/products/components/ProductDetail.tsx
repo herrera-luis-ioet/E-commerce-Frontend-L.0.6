@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Product } from '../../../types/product.types';
-import { fetchProductById, fetchProducts } from '../../../store/slices/productSlice';
+import { fetchProductById } from '../../../store/slices/productSlice';
 import { AppDispatch } from '../../../store';
+import { useAppSelector, useProducts } from '../../../store/hooks';
+import { filterProductsBySearchQuery } from '../../../utils/formatters';
 import Card from '../../../components/ui/Card';
 import Spinner from '../../../components/ui/Spinner';
 import ProductGallery from './ProductGallery';
 import ProductInfo from './ProductInfo';
 import RelatedProducts from './RelatedProducts';
+import Input from '../../../components/ui/Input';
 
 /**
  * ProductDetail component props
@@ -36,17 +39,33 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
   // Local state
   const [product, setProduct] = useState<Product | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [relatedLoading, setRelatedLoading] = useState<boolean>(true);
+  const [relatedLoading, setRelatedLoading] = useState<boolean>(false);
   const [relatedError, setRelatedError] = useState<string | null>(null);
   
-  // Redux dispatch
+  // Redux state and dispatch
   const dispatch = useDispatch<AppDispatch>();
+  const allProducts = useProducts();
+  const storeProduct = useAppSelector(state => {
+    // Safely access the products array with null checks
+    const products = state.products?.products || [];
+    return products.find(p => p.id === productId) || state.products?.selectedProduct || null;
+  });
 
-  // Fetch product details
+  // Fetch product details - use store product if available, otherwise fetch from API
   useEffect(() => {
     const getProductDetails = async () => {
+      // If product is already in Redux store, use it
+      if (storeProduct && storeProduct.id === productId) {
+        setProduct(storeProduct);
+        setLoading(false);
+        return;
+      }
+      
+      // Otherwise fetch from API
       setLoading(true);
       setError(null);
       
@@ -68,40 +87,51 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
     if (productId) {
       getProductDetails();
     }
-  }, [dispatch, productId]);
+  }, [dispatch, productId, storeProduct]);
 
-  // Fetch related products based on category
+  // Get related products from Redux store based on category
   useEffect(() => {
-    const getRelatedProducts = async () => {
-      if (!product) return;
-      
-      setRelatedLoading(true);
-      setRelatedError(null);
-      
-      try {
-        // Fetch products from the same category
-        const resultAction = await dispatch(fetchProducts({
-          filter: { categoryId: product.categoryId },
-          limit: 10
-        }));
-        
-        if (fetchProducts.fulfilled.match(resultAction)) {
-          setRelatedProducts(resultAction.payload.products);
-        } else {
-          setRelatedError('Failed to fetch related products');
-        }
-      } catch (err) {
-        setRelatedError('An error occurred while fetching related products');
-        console.error('Error fetching related products:', err);
-      } finally {
-        setRelatedLoading(false);
-      }
-    };
+    if (!product) return;
     
-    if (product) {
-      getRelatedProducts();
+    setRelatedLoading(true);
+    setRelatedError(null);
+    
+    try {
+      // Filter products from the same category from Redux store
+      const sameCategoryProducts = allProducts.filter(p => 
+        p.categoryId === product.categoryId && p.id !== product.id
+      );
+      
+      if (sameCategoryProducts.length > 0) {
+        setRelatedProducts(sameCategoryProducts);
+      } else {
+        // If no related products found, show message
+        setRelatedError('No related products found');
+      }
+    } catch (err) {
+      setRelatedError('An error occurred while filtering related products');
+      console.error('Error filtering related products:', err);
+    } finally {
+      setRelatedLoading(false);
     }
-  }, [dispatch, product]);
+  }, [product, allProducts]);
+  
+  // Filter related products based on search query
+  useEffect(() => {
+    if (relatedProducts.length === 0) {
+      setFilteredProducts([]);
+      return;
+    }
+    
+    // Apply search filter to related products
+    const filtered = filterProductsBySearchQuery(relatedProducts, searchQuery);
+    setFilteredProducts(filtered);
+  }, [relatedProducts, searchQuery]);
+  
+  // Handle search query change
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
 
   // Handle loading state
   if (loading) {
@@ -184,15 +214,40 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
       </div>
       
       {/* Related products section */}
-      <RelatedProducts
-        currentProductId={product.id}
-        products={relatedProducts}
-        isLoading={relatedLoading}
-        error={relatedError || null}
-        onViewDetails={onViewDetails}
-        onAddToCart={(product) => onAddToCart && onAddToCart(product, 1)}
-        className="mt-8"
-      />
+      <div className="space-y-4">
+        {/* Search input for related products */}
+        <div className="relative">
+          <Input
+            type="text"
+            placeholder="Search related products..."
+            value={searchQuery}
+            onChange={handleSearchChange}
+            className="w-full max-w-xs"
+            aria-label="Search related products"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              aria-label="Clear search"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
+        </div>
+        
+        <RelatedProducts
+          currentProductId={product.id}
+          products={filteredProducts}
+          isLoading={relatedLoading}
+          error={relatedError || null}
+          onViewDetails={onViewDetails}
+          onAddToCart={(product) => onAddToCart && onAddToCart(product, 1)}
+          className="mt-2"
+        />
+      </div>
     </div>
   );
 };
