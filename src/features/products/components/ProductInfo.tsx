@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import { Product } from '../../../types/product.types';
 import Button from '../../../components/ui/Button';
 import { formatPrice } from '../../../utils/formatters';
-import { useAppDispatch } from '../../../store/hooks';
-import { addToCart } from '../../../store/slices/cartSlice';
 
 /**
  * ProductInfo component props
@@ -29,12 +27,9 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
   // State for quantity and feedback
   const [quantity, setQuantity] = useState<number>(1);
   const [addedToCart, setAddedToCart] = useState(false);
-  const dispatch = useAppDispatch();
   
   // Handle adding to cart with feedback
   const handleAddToCart = (product: Product, quantity: number) => {
-    dispatch(addToCart({ product, quantity }));
-    
     // Show feedback
     setAddedToCart(true);
     
