@@ -25,8 +25,6 @@ const initialState: ProductState = {
   viewMode: 'grid',
   currentPage: 1,
   itemsPerPage: 12,
-  hasNextPage: false,
-  hasPrevPage: false,
   totalProducts: 0,
   totalPages: 0,
   loading: false,
@@ -52,10 +50,8 @@ export const fetchProducts = createAsyncThunk(
       const response = await productService.getProducts(filter, { page, limit });
       return {
         products: response.data,
-        totalProducts: response.meta?.total ?? response.data.length,
-        totalPages: response.meta?.totalPages ?? Math.ceil(response.data.length / limit),
-        currentPage: response.meta?.currentPage ?? page,
-        itemsPerPage: response.meta?.itemsPerPage ?? limit
+        totalProducts: response.meta?.total || response.data.length,
+        totalPages: response.meta?.totalPages || 1
       };
     } catch (error) {
       return rejectWithValue(error instanceof Error ? error.message : 'Failed to fetch products');
@@ -113,10 +109,8 @@ export const fetchProductsByCategory = createAsyncThunk(
       const response = await productService.getProductsByCategory(categoryId, filter, { page, limit });
       return {
         products: response.data,
-        totalProducts: response.meta?.total ?? response.data.length,
-        totalPages: response.meta?.totalPages ?? Math.ceil(response.data.length / limit),
-        currentPage: response.meta?.currentPage ?? page,
-        itemsPerPage: response.meta?.itemsPerPage ?? limit
+        totalProducts: response.meta?.total || response.data.length,
+        totalPages: response.meta?.totalPages || 1
       };
     } catch (error) {
       return rejectWithValue(error instanceof Error ? error.message : 'Failed to fetch products by category');
@@ -140,10 +134,8 @@ export const fetchFeaturedProducts = createAsyncThunk(
       const response = await productService.getFeaturedProducts({ page, limit });
       return {
         products: response.data,
-        totalProducts: response.meta?.total ?? response.data.length,
-        totalPages: response.meta?.totalPages ?? Math.ceil(response.data.length / limit),
-        currentPage: response.meta?.currentPage ?? page,
-        itemsPerPage: response.meta?.itemsPerPage ?? limit
+        totalProducts: response.meta?.total || response.data.length,
+        totalPages: response.meta?.totalPages || 1
       };
     } catch (error) {
       return rejectWithValue(error instanceof Error ? error.message : 'Failed to fetch featured products');
@@ -171,10 +163,8 @@ export const searchProducts = createAsyncThunk(
       const response = await productService.searchProducts(query, filter, { page, limit });
       return {
         products: response.data,
-        totalProducts: response.meta?.total ?? response.data.length,
-        totalPages: response.meta?.totalPages ?? Math.ceil(response.data.length / limit),
-        currentPage: response.meta?.currentPage ?? page,
-        itemsPerPage: response.meta?.itemsPerPage ?? limit
+        totalProducts: response.meta?.total || response.data.length,
+        totalPages: response.meta?.totalPages || 1
       };
     } catch (error) {
       return rejectWithValue(error instanceof Error ? error.message : 'Failed to search products');
@@ -227,18 +217,6 @@ const productSlice = createSlice({
         state.products = action.payload.products;
         state.totalProducts = action.payload.totalProducts;
         state.totalPages = action.payload.totalPages;
-        state.currentPage = action.payload.currentPage;
-        state.itemsPerPage = action.payload.itemsPerPage;
-        state.hasNextPage = state.currentPage < state.totalPages;
-        state.hasPrevPage = state.currentPage > 1;
-        state.currentPage = action.payload.currentPage;
-        state.itemsPerPage = action.payload.itemsPerPage;
-        state.hasNextPage = state.currentPage < state.totalPages;
-        state.hasPrevPage = state.currentPage > 1;
-        state.currentPage = action.payload.currentPage;
-        state.itemsPerPage = action.payload.itemsPerPage;
-        state.hasNextPage = state.currentPage < state.totalPages;
-        state.hasPrevPage = state.currentPage > 1;
         state.initialized = true;
       })
       .addCase(fetchProducts.rejected, (state, action) => {
