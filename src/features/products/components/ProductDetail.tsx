@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { Link } from 'react-router-dom';
 import { Product } from '../../../types/product.types';
 import { fetchProductById, fetchProducts } from '../../../store/slices/productSlice';
 import { AppDispatch } from '../../../store';
@@ -148,19 +149,19 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
       <nav className="text-sm text-gray-600 dark:text-gray-400">
         <ol className="flex items-center space-x-2">
           <li>
-            <a href="/" className="hover:text-primary">Home</a>
+            <Link to="/" className="hover:text-primary">Home</Link>
           </li>
           <li>
             <span className="mx-2">/</span>
           </li>
           <li>
-            <a href="/products" className="hover:text-primary">Products</a>
+            <Link to="/products" className="hover:text-primary">Products</Link>
           </li>
           <li>
             <span className="mx-2">/</span>
           </li>
           <li>
-            <a href={`/categories/${product.categoryId}`} className="hover:text-primary">{product.category}</a>
+            <Link to={`/categories/${product.categoryId}`} className="hover:text-primary">{product.category}</Link>
           </li>
           <li>
             <span className="mx-2">/</span>
